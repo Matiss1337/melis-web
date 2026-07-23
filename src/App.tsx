@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import lvLocationsSource from '../locations.md?raw'
 import enLocationsSource from '../locations.en.md?raw'
+import { baseUrl } from './baseUrl'
 
 type Screen = 'setup' | 'roles' | 'game' | 'finished'
 type Language = 'lv' | 'en'
@@ -289,7 +290,7 @@ function App() {
       <section className="relative mx-auto w-full max-w-[430px] rounded-[2rem] bg-white p-6 shadow-xl shadow-orange-950/10 sm:min-h-[780px]">
         <header className="mb-8 flex items-center justify-between">
           <div className="flex items-center">
-            <img className="mr-2 size-8 rounded-lg" src={`${import.meta.env.BASE_URL}icon-192.png`} alt="" />
+            <img className="mr-2 size-8 rounded-lg" src={`${baseUrl}icon-192.png`} alt="" />
             <h1 className="text-3xl font-black tracking-tight text-orange-600">Melis</h1>
           </div>
           <div className="flex items-center gap-3">
