@@ -83,7 +83,7 @@ function App() {
     setScreen('game')
   }
 
-  const time = `${String(Math.floor(secondsLeft / 60)).padStart(2, '0')}:${String(secondsLeft % 60).padStart(2, '0')}`
+  const time = `${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, '0')}`
   const addPlayer = () => setPlayers((value) => [...value, ''])
   const openSettings = () => {
     setSettingsReturnScreen(screen)
