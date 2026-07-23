@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/melis-web/sw.js', { scope: '/melis-web/' })})}
