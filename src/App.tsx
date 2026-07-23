@@ -117,7 +117,8 @@ function App() {
         </div>}
 
         {screen === 'setup' && (
-          <div className="space-y-6">
+          <div className="flex min-h-[calc(100dvh-10rem)] flex-col">
+            <div className="space-y-6">
             <><div><h2 className="text-2xl font-bold">Spēlētāji</h2><p className="mt-1 text-stone-500">Pievieno vismaz 3 spēlētājus.</p></div><div className="space-y-3">
               {players.map((player, index) => <div className="flex gap-2" key={index}>
                 <input className="w-full rounded-xl bg-stone-100 px-4 py-3 outline-none ring-orange-400 focus:ring-2" placeholder={`Spēlētājs ${index + 1}`} value={player} onChange={(event) => setPlayers((value) => value.map((name, item) => item === index ? event.target.value : name))} />
@@ -127,6 +128,8 @@ function App() {
             </div></>
             <label className="block"><span className="mb-2 block font-bold">Spēles ilgums</span><select className="timer-select w-full rounded-xl bg-stone-100 py-3 pl-4 pr-14" value={minutes} onChange={(event) => setMinutes(Number(event.target.value))}>{[5, 10, 15, 20].map((value) => <option key={value} value={value}>{value} minūtes</option>)}</select></label>
             <button className="w-full rounded-2xl bg-orange-500 py-4 text-lg font-black text-white disabled:bg-stone-300" disabled={!canStart} onClick={start}>{settingsReturnScreen === 'setup' ? 'Sākt spēli' : 'Saglabāt / Sākt spēli'}</button>
+            </div>
+            <p className="mt-auto pb-3 pt-6 text-center text-xs text-orange-600"><a className="font-semibold" href="https://www.linkedin.com/in/matiss-judins-319235228/" target="_blank" rel="noreferrer">MatissJ</a></p>
           </div>
         )}
 
