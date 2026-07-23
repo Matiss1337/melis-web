@@ -68,6 +68,9 @@ function App() {
     if (localStorage.getItem(installPromptKey)) return
 
     const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent)
+    const isAndroid = /Android/.test(navigator.userAgent)
+    if (!isIos && !isAndroid) return
+
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || ('standalone' in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone))
     if (isIos && !isStandalone) setInstallOpen(true)
 
