@@ -147,7 +147,7 @@ function App() {
               <h2 className="text-lg font-black">Spēles noteikumi</h2>
               <div className="mt-3 space-y-3 text-sm leading-5 text-stone-600">
                 <section><h3 className="font-bold text-stone-900">Iestatīšana</h3><p>Pievieno spēlētājus, izvēlies spēles ilgumu un nospied “Sākt spēli”.</p></section>
-                <section><h3 className="font-bold text-stone-900">Lokācijas apskate</h3><p>Katrs spēlētājs slepeni apskata savu lokāciju. Viens spēlētājs ir Melis un redz tikai “Tu esi Melis”.</p></section>
+                <section><h3 className="font-bold text-stone-900">Lokācijas apskate</h3><p>Visi, izņemot Meli, slepeni redz vienu un to pašu lokāciju. Melis redz tikai “Tu esi Melis”, tāpēc nezina kopīgo lokāciju.</p></section>
                 <section><h3 className="font-bold text-stone-900">Spēle</h3><p>Uzdodiet jautājumus par lokāciju. Pārējiem jāatbild pietiekami skaidri, lai pierādītu, ka viņi zina vietu, bet neatklātu to Melim.</p></section>
                 <section><h3 className="font-bold text-stone-900">Uzvara</h3><p>Spēlētāji uzvar, ja atrod Meli un viņš neuzmin lokāciju. Melis uzvar, ja uzmin lokāciju pirms viņu atklāj.</p></section>
               </div>
