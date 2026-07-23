@@ -4,9 +4,11 @@ import locationsSource from '../locations.md?raw'
 type Screen = 'setup' | 'roles' | 'game' | 'finished'
 type SavedGame = { players: string[]; minutes: number }
 type PlayedLocation = { name: string; playedAt: number }
+type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }
 
 const storageKey = 'melis-settings'
 const playedLocationsKey = 'melis-played-locations'
+const installPromptKey = 'melis-install-prompt-seen'
 const weekInMilliseconds = 7 * 24 * 60 * 60 * 1000
 const locations = locationsSource.match(/^\d+\. (.+)$/gm)?.map((line) => line.replace(/^\d+\. /, '')) ?? []
 
@@ -45,6 +47,8 @@ function App() {
   const [paused, setPaused] = useState(false)
   const [settingsReturnScreen, setSettingsReturnScreen] = useState<Screen>('setup')
   const [rulesOpen, setRulesOpen] = useState(false)
+  const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null)
+  const [installOpen, setInstallOpen] = useState(false)
 
   const validPlayers = players.map((player) => player.trim()).filter(Boolean)
   const canStart = players.length >= 3 && players.every((player) => player.trim().length > 0)
@@ -59,6 +63,23 @@ function App() {
   useEffect(() => {
     if (screen === 'game' && secondsLeft === 0) setScreen('finished')
   }, [screen, secondsLeft])
+
+  useEffect(() => {
+    if (localStorage.getItem(installPromptKey)) return
+
+    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || ('standalone' in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone))
+    if (isIos && !isStandalone) setInstallOpen(true)
+
+    const handleInstallPrompt = (event: Event) => {
+      event.preventDefault()
+      setInstallPrompt(event as InstallPromptEvent)
+      setInstallOpen(true)
+    }
+
+    window.addEventListener('beforeinstallprompt', handleInstallPrompt)
+    return () => window.removeEventListener('beforeinstallprompt', handleInstallPrompt)
+  }, [])
 
   const start = () => {
     if (!canStart || locations.length === 0) return
@@ -89,12 +110,28 @@ function App() {
     setSettingsReturnScreen(screen)
     setScreen('setup')
   }
+  const dismissInstall = () => {
+    localStorage.setItem(installPromptKey, 'true')
+    setInstallOpen(false)
+  }
+  const install = async () => {
+    if (!installPrompt) {
+      dismissInstall()
+      return
+    }
+    await installPrompt.prompt()
+    await installPrompt.userChoice
+    dismissInstall()
+  }
 
   return (
     <main className="min-h-dvh bg-orange-50 px-4 py-6 text-stone-900 sm:flex sm:items-center sm:justify-center">
       <section className="relative mx-auto w-full max-w-[430px] rounded-[2rem] bg-white p-6 shadow-xl shadow-orange-950/10 sm:min-h-[780px]">
         <header className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-black tracking-tight text-orange-600">Melis</h1>
+          <div className="flex items-center">
+            <img className="mr-2 size-8 rounded-lg" src={`${import.meta.env.BASE_URL}icon-192.png`} />
+            <h1 className="text-3xl font-black tracking-tight text-orange-600">Melis</h1>
+          </div>
           <div className="flex items-center gap-3">
             {screen !== 'setup' && <button className="text-orange-600" onClick={openSettings}><svg className="size-8 fill-current" viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.96-.7 2.8l1.46 1.46A7.94 7.94 0 0 0 20 12c0-4.42-3.58-8-8-8Zm-6.76 4.74A7.94 7.94 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3c-3.31 0-6-2.69-6-6 0-1.01.25-1.96.7-2.8L5.24 8.74Z" /></svg></button>}
             <button className="text-orange-600" onClick={() => { if (screen === 'game') setPaused(true); setRulesOpen(true) }}><svg className="size-8 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2.5"><circle cx="12" cy="12" r="9" /><path d="M12 11v5m0-8h.01" strokeLinecap="round" /></svg></button>
@@ -113,6 +150,15 @@ function App() {
               </div>
             </div>
             <button className="text-4xl font-semibold leading-none text-stone-500 !text-[20px]" onClick={() => { setRulesOpen(false); if (screen === 'game') setPaused(false) }}>×</button>
+          </div>
+        </div>}
+
+        {installOpen && <div className="absolute inset-x-6 top-20 z-20 rounded-2xl bg-white p-5 shadow-2xl ring-1 ring-stone-200">
+          <h2 className="text-lg font-black">Instalēt Melis</h2>
+          <p className="mt-2 text-sm leading-5 text-stone-600">{installPrompt ? 'Pievieno Melis sākuma ekrānam ātrai piekļuvei.' : 'Safari izvēlnē nospied Kopīgot un pēc tam “Pievienot sākuma ekrānam”.'}</p>
+          <div className="mt-5 flex gap-3">
+            <button className="flex-1 rounded-xl border-2 border-orange-500 py-3 font-black text-orange-600" onClick={dismissInstall}>Vēlāk</button>
+            <button className="flex-1 rounded-xl bg-orange-500 py-3 font-black text-white" onClick={install}>{installPrompt ? 'Instalēt' : 'Sapratu'}</button>
           </div>
         </div>}
 

@@ -14,9 +14,12 @@ export default defineConfig({
         name: 'Melis',
         short_name: 'Melis',
         lang: 'lv',
-        display: 'standalone',
+        display: 'fullscreen',
         theme_color: '#f97316',
         background_color: '#fff7ed',
+        icons: [
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+        ],
       },
     }),
   ],
