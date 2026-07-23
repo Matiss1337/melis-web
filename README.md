@@ -39,7 +39,7 @@ Keep the interface and game flow simple. Visual design will be decided later.
 
 ## Locations
 
-Melis starts with 300 simple Latvian-friendly location cards, such as parks, nightclubs, attics, basements, limousines, dirigibles, theatres, and toilets. The full list is maintained in [locations.md](./locations.md).
+Melis starts with 279 simple Latvian-friendly location cards, such as parks, nightclubs, attics, basements, limousines, dirigibles, theatres, and toilets. The full list is maintained in [locations.md](./locations.md).
 
 ## Winning
 
