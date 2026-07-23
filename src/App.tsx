@@ -141,7 +141,7 @@ function App() {
         {(screen === 'game' || screen === 'finished') && (
           <div className="flex min-h-[600px] flex-col items-center justify-center text-center">
             <p className="text-xl font-black text-stone-500">{screen === 'game' ? 'Laiks rit' : 'Laiks ir beidzies'}</p>
-            <p className={`mt-3 text-7xl font-black tabular-nums ${screen === 'finished' ? 'text-red-600' : 'text-stone-900'}`}>{screen === 'finished' ? '0' : time}</p>
+            <p className={`mt-3 text-7xl font-black tabular-nums ${screen === 'finished' ? 'text-red-600' : 'text-stone-900'}`}>{time}</p>
             {screen === 'game' && <button className="mt-8 w-full rounded-2xl bg-stone-900 py-4 text-xl font-black text-white" onClick={() => setPaused((value) => !value)}>{paused ? 'Turpināt' : 'Pauze'}</button>}
             {screen === 'finished' && <button className="mt-10 w-full rounded-2xl bg-orange-500 py-4 text-lg font-black text-white" onClick={start}>Spēlēt vēlreiz</button>}
           </div>
