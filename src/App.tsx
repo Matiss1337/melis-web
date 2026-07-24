@@ -17,6 +17,7 @@ const installPromptKey = 'melis-install-prompt-seen'
 const weekInMilliseconds = 7 * 24 * 60 * 60 * 1000
 const languageOrder: Language[] = ['lv', 'en', 'ru']
 const nextLanguage = (language: Language): Language => languageOrder[(languageOrder.indexOf(language) + 1) % languageOrder.length]
+const languageCodes: Record<Language, string> = { lv: 'LV', en: 'EN', ru: 'RU' }
 const parseLocations = (source: string) => source.match(/^\d+\. (.+)$/gm)?.map((line) => line.replace(/^\d+\. /, '')) ?? []
 const locationsByLanguage: Record<Language, string[]> = {
   lv: parseLocations(lvLocationsSource),
@@ -26,7 +27,6 @@ const locationsByLanguage: Record<Language, string[]> = {
 
 const translations = {
   lv: {
-    switchLanguageCode: 'EN',
     switchLanguageLabel: 'Pārslēgt uz angļu valodu',
     openSettings: 'Atvērt iestatījumus',
     openRules: 'Atvērt noteikumus',
@@ -77,7 +77,6 @@ const translations = {
     playAgain: 'Spēlēt vēlreiz',
   },
   en: {
-    switchLanguageCode: 'RU',
     switchLanguageLabel: 'Switch to Russian',
     openSettings: 'Open settings',
     openRules: 'Open rules',
@@ -128,7 +127,6 @@ const translations = {
     playAgain: 'Play again',
   },
   ru: {
-    switchLanguageCode: 'LV',
     switchLanguageLabel: 'Переключить на латышский',
     openSettings: 'Открыть настройки',
     openRules: 'Открыть правила',
@@ -359,7 +357,7 @@ function App() {
                 <circle cx="12" cy="12" r="9" />
                 <path d="M3 12h18M12 3c2.2 2.4 3.3 5.4 3.3 9S14.2 18.6 12 21c-2.2-2.4-3.3-5.4-3.3-9S9.8 5.4 12 3Z" />
               </svg>
-              <span>{t.switchLanguageCode}</span>
+              <span>{languageCodes[language]}</span>
             </button>
             {screen !== 'setup' && (
               <button className="text-orange-600" aria-label={t.openSettings} onClick={openSettings}>
