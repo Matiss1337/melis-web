@@ -6,6 +6,7 @@ module.exports = {
   moduleNameMapper: {
     '^\\.\\./locations\\.md\\?raw$': '<rootDir>/locations.md',
     '^\\.\\./locations\\.en\\.md\\?raw$': '<rootDir>/locations.en.md',
+    '^\\.\\./locations\\.ru\\.md\\?raw$': '<rootDir>/locations.ru.md',
     '^\\./baseUrl$': '<rootDir>/src/test/baseUrlMock.ts',
   },
   transform: {
