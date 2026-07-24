@@ -60,11 +60,11 @@ describe('App', () => {
 
     await user.click(screen.getByRole('button', { name: 'Pārslēgt uz angļu valodu' }))
     expect(screen.getByRole('heading', { name: 'Players' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Switch to Russian' })).toHaveTextContent('RU')
+    expect(screen.getByRole('button', { name: 'Switch to Russian' })).toHaveTextContent('EN')
 
     await user.click(screen.getByRole('button', { name: 'Switch to Russian' }))
     expect(screen.getByRole('heading', { name: 'Игроки' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Переключить на латышский' })).toHaveTextContent('LV')
+    expect(screen.getByRole('button', { name: 'Переключить на латышский' })).toHaveTextContent('RU')
 
     await fillPlayers(user, ['Аня', 'Боря', 'Катя'], 'Игрок')
     await user.click(screen.getByRole('button', { name: 'Начать игру' }))
@@ -79,7 +79,7 @@ describe('App', () => {
     expect(screen.getByText('Парк')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Переключить на латышский' }))
-    expect(screen.getByRole('button', { name: 'Pārslēgt uz angļu valodu' })).toHaveTextContent('EN')
+    expect(screen.getByRole('button', { name: 'Pārslēgt uz angļu valodu' })).toHaveTextContent('LV')
   })
 
   it('completes the journey, pauses the timer, and resets with play again', async () => {
