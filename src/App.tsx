@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import lvLocationsSource from '../locations.md?raw'
 import enLocationsSource from '../locations.en.md?raw'
+import ruLocationsSource from '../locations.ru.md?raw'
 import { baseUrl } from './baseUrl'
 
 type Screen = 'setup' | 'roles' | 'game' | 'finished'
-type Language = 'lv' | 'en'
+type Language = 'lv' | 'en' | 'ru'
 type SavedGame = { players: string[]; minutes: number }
 type PlayedLocation = { locationIndex: number; playedAt: number }
 type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }
@@ -14,10 +15,13 @@ const languageKey = 'melis-language'
 const playedLocationsKey = 'melis-played-locations'
 const installPromptKey = 'melis-install-prompt-seen'
 const weekInMilliseconds = 7 * 24 * 60 * 60 * 1000
+const languageOrder: Language[] = ['lv', 'en', 'ru']
+const nextLanguage = (language: Language): Language => languageOrder[(languageOrder.indexOf(language) + 1) % languageOrder.length]
 const parseLocations = (source: string) => source.match(/^\d+\. (.+)$/gm)?.map((line) => line.replace(/^\d+\. /, '')) ?? []
 const locationsByLanguage: Record<Language, string[]> = {
   lv: parseLocations(lvLocationsSource),
   en: parseLocations(enLocationsSource),
+  ru: parseLocations(ruLocationsSource),
 }
 
 const translations = {
@@ -73,8 +77,8 @@ const translations = {
     playAgain: 'Spēlēt vēlreiz',
   },
   en: {
-    switchLanguageCode: 'LV',
-    switchLanguageLabel: 'Switch to Latvian',
+    switchLanguageCode: 'RU',
+    switchLanguageLabel: 'Switch to Russian',
     openSettings: 'Open settings',
     openRules: 'Open rules',
     closeRules: 'Close rules',
@@ -123,10 +127,61 @@ const translations = {
     pause: 'Pause',
     playAgain: 'Play again',
   },
+  ru: {
+    switchLanguageCode: 'LV',
+    switchLanguageLabel: 'Переключить на латышский',
+    openSettings: 'Открыть настройки',
+    openRules: 'Открыть правила',
+    closeRules: 'Закрыть правила',
+    rulesTitle: 'Правила игры',
+    rules: [
+      {
+        title: 'Подготовка',
+        body: 'Добавьте игроков, выберите длительность игры и нажмите «Начать игру».',
+      },
+      {
+        title: 'Просмотр локации',
+        body: 'Все, кроме Шпиона, тайно видят одну и ту же локацию. Шпион видит только «Ты шпион», поэтому не знает общую локацию.',
+      },
+      {
+        title: 'Игра',
+        body: 'Задавайте вопросы о локации. Остальные должны отвечать достаточно ясно, чтобы доказать, что знают место, но не раскрыть его Шпиону.',
+      },
+      {
+        title: 'Победа',
+        body: 'Игроки побеждают, если находят Шпиона и он не угадывает локацию. Шпион побеждает, если угадывает локацию до разоблачения.',
+      },
+    ],
+    installTitle: 'Установить Melis',
+    installPrompt: 'Добавьте Melis на домашний экран для быстрого доступа.',
+    installIos: 'В Safari нажмите «Поделиться», затем «На экран «Домой»».',
+    installLater: 'Позже',
+    installAction: 'Установить',
+    installGotIt: 'Понятно',
+    playersTitle: 'Игроки',
+    playersHelp: 'Добавьте минимум 3 игроков.',
+    playerPlaceholder: 'Игрок',
+    removePlayer: 'Удалить игрока',
+    addPlayer: '+ Добавить игрока',
+    durationLabel: 'Длительность игры',
+    minuteLabel: 'минут',
+    startGame: 'Начать игру',
+    saveAndStart: 'Сохранить / Начать игру',
+    viewLocation: 'Посмотреть локацию',
+    startRound: 'Начать раунд',
+    hideAndPass: 'Скрыть и передать дальше',
+    youAreSpy: 'Ты шпион',
+    locationLabel: 'Локация',
+    timerRunning: 'Время идёт',
+    timerFinished: 'Время вышло',
+    resume: 'Продолжить',
+    pause: 'Пауза',
+    playAgain: 'Играть снова',
+  },
 } as const
 
 function isLanguage(value: string | null): value is Language {
-  return value === 'lv' || value === 'en'
+  return value === 'lv' || value === 'en' || value === 'ru'
 }
 
 function loadLanguage(): Language {
@@ -298,7 +353,7 @@ function App() {
               className="flex items-center gap-1 rounded-full text-sm font-black text-orange-600"
               aria-label={t.switchLanguageLabel}
               title={t.switchLanguageLabel}
-              onClick={() => setLanguage((value) => value === 'lv' ? 'en' : 'lv')}
+              onClick={() => setLanguage((value) => nextLanguage(value))}
             >
               <svg className="size-7 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2.2">
                 <circle cx="12" cy="12" r="9" />
