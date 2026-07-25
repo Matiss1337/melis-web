@@ -348,7 +348,7 @@ function App() {
                   setScreen('tickTock')
                 }}
               >
-                <div className="flex size-14 items-center justify-center rounded-2xl bg-stone-900 text-2xl font-black text-white">X</div>
+                <div className="flex size-14 items-center justify-center rounded-2xl bg-stone-900 text-2xl font-black text-white" aria-hidden="true">X</div>
                 <span className="text-xl font-black">{t.tickTock}</span>
               </button>
               {placeholderGames.map((index) => (
