@@ -25,7 +25,7 @@ src/
   app/
     App.tsx                 Router, shared PWA setup, route layout
     GameShell.tsx           Header, Home action, Rules overlay
-    games.ts                Static launcher metadata and lazy route imports
+    games.ts                Static lazy route imports
   games/
     melis/
       MelisGame.tsx
@@ -40,14 +40,14 @@ src/
       MemaisSovsGame.tsx
       memaisSovsRules.ts
       words.ts
-  test/
-    e2e/
+tests/
+  games.spec.ts            Galaxy S25 browser flows
 ```
 
 ### Rules for new games
 
 - A game owns its state, rules, assets, and screen flow under `src/games/<game-id>/`.
-- `app/games.ts` owns only launcher metadata: title, icon, route, and lazy import.
+- `app/games.ts` owns static lazy imports; route and launcher details stay in the app shell.
 - `GameShell` contains only UI proven to be shared: header, Home action, and Rules overlay.
 - Do not create a generic game-state interface. Melis, Tik Tok, and Mēmais šovs have different lifecycles; a generic interface would add coupling without reuse.
 - Extract pure game rules only when they have meaningful transitions to test, such as Tik Tok win/tie detection or Melis location selection.
