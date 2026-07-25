@@ -8,6 +8,10 @@ const fillPlayers = async (user: ReturnType<typeof userEvent.setup>, names: stri
   }
 }
 
+const openMalice = async (user: ReturnType<typeof userEvent.setup>) => {
+  await user.click(screen.getByRole('button', { name: 'Malice' }))
+}
+
 describe('App', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -19,6 +23,12 @@ describe('App', () => {
     const user = userEvent.setup()
 
     render(<App />)
+
+    expect(screen.getByRole('heading', { name: 'Spēles' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Malice' })).toBeInTheDocument()
+    expect(screen.getAllByText('Coming soon')).toHaveLength(5)
+
+    await openMalice(user)
 
     expect(screen.getByRole('heading', { name: 'Spēlētāji' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sākt spēli' })).toBeDisabled()
@@ -37,6 +47,7 @@ describe('App', () => {
     render(<App />)
 
     await user.click(screen.getByRole('button', { name: 'Pārslēgt uz angļu valodu' }))
+    await openMalice(user)
     await fillPlayers(user, ['Alice', 'Bob', 'Charlie'], 'Player')
     await user.click(screen.getByRole('button', { name: 'Start game' }))
 
@@ -59,6 +70,7 @@ describe('App', () => {
     render(<App />)
 
     await user.click(screen.getByRole('button', { name: 'Pārslēgt uz angļu valodu' }))
+    await openMalice(user)
     expect(screen.getByRole('heading', { name: 'Players' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Switch to Russian' })).toHaveTextContent('EN')
 
@@ -89,6 +101,7 @@ describe('App', () => {
 
     render(<App />)
 
+    await openMalice(user)
     await fillPlayers(user, ['Anna', 'Berts', 'Cēsis'], 'Spēlētājs')
     await user.click(screen.getByRole('button', { name: 'Sākt spēli' }))
 

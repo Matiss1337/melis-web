@@ -4,7 +4,7 @@ import enLocationsSource from '../locations.en.md?raw'
 import ruLocationsSource from '../locations.ru.md?raw'
 import { baseUrl } from './baseUrl'
 
-type Screen = 'setup' | 'roles' | 'game' | 'finished'
+type Screen = 'home' | 'setup' | 'roles' | 'game' | 'finished'
 type Language = 'lv' | 'en' | 'ru'
 type SavedGame = { players: string[]; minutes: number }
 type PlayedLocation = { locationIndex: number; playedAt: number }
@@ -24,9 +24,14 @@ const locationsByLanguage: Record<Language, string[]> = {
   en: parseLocations(enLocationsSource),
   ru: parseLocations(ruLocationsSource),
 }
+const placeholderGames = Array.from({ length: 5 }, (_, index) => index)
 
 const translations = {
   lv: {
+    gamesTitle: 'Spēles',
+    chooseGame: 'Izvēlies spēli',
+    gamesSubtitle: 'Izvēlies spēli vakaram.',
+    comingSoon: 'Coming soon',
     switchLanguageLabel: 'Pārslēgt uz angļu valodu',
     openSettings: 'Atvērt iestatījumus',
     openRules: 'Atvērt noteikumus',
@@ -77,6 +82,10 @@ const translations = {
     playAgain: 'Spēlēt vēlreiz',
   },
   en: {
+    gamesTitle: 'Games',
+    chooseGame: 'Pick a game',
+    gamesSubtitle: 'Choose a game for the night.',
+    comingSoon: 'Coming soon',
     switchLanguageLabel: 'Switch to Russian',
     openSettings: 'Open settings',
     openRules: 'Open rules',
@@ -127,6 +136,10 @@ const translations = {
     playAgain: 'Play again',
   },
   ru: {
+    gamesTitle: 'Игры',
+    chooseGame: 'Выберите игру',
+    gamesSubtitle: 'Выберите игру на вечер.',
+    comingSoon: 'Coming soon',
     switchLanguageLabel: 'Переключить на латышский',
     openSettings: 'Открыть настройки',
     openRules: 'Открыть правила',
@@ -220,7 +233,7 @@ function loadRecentLocations(language: Language): PlayedLocation[] {
 function App() {
   const saved = useMemo(loadSettings, [])
   const initialLanguage = useMemo(loadLanguage, [])
-  const [screen, setScreen] = useState<Screen>('setup')
+  const [screen, setScreen] = useState<Screen>('home')
   const [language, setLanguage] = useState<Language>(initialLanguage)
   const [players, setPlayers] = useState(saved.players)
   const [minutes, setMinutes] = useState(saved.minutes)
@@ -337,6 +350,7 @@ function App() {
     await installPrompt.userChoice
     dismissInstall()
   }
+  const gameTitle = screen === 'home' ? t.gamesTitle : 'Malice'
 
   return (
     <main className="min-h-dvh bg-orange-50 px-4 py-6 text-stone-900 sm:flex sm:items-center sm:justify-center">
@@ -344,7 +358,7 @@ function App() {
         <header className="mb-8 flex items-center justify-between">
           <div className="flex items-center">
             <img className="mr-2 size-8 rounded-lg" src={`${baseUrl}icon-192.png`} alt="" />
-            <h1 className="text-3xl font-black tracking-tight text-orange-600">Melis</h1>
+            <h1 className="text-3xl font-black tracking-tight text-orange-600">{gameTitle}</h1>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -359,26 +373,28 @@ function App() {
               </svg>
               <span>{languageCodes[language]}</span>
             </button>
-            {screen !== 'setup' && (
+            {screen !== 'home' && screen !== 'setup' && (
               <button className="text-orange-600" aria-label={t.openSettings} onClick={openSettings}>
                 <svg className="size-8 fill-current" viewBox="0 0 24 24">
                   <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.96-.7 2.8l1.46 1.46A7.94 7.94 0 0 0 20 12c0-4.42-3.58-8-8-8Zm-6.76 4.74A7.94 7.94 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3c-3.31 0-6-2.69-6-6 0-1.01.25-1.96.7-2.8L5.24 8.74Z" />
                 </svg>
               </button>
             )}
-            <button
-              className="text-orange-600"
-              aria-label={t.openRules}
-              onClick={() => {
-                if (screen === 'game') setPaused(true)
-                setRulesOpen(true)
-              }}
-            >
-              <svg className="size-8 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2.5">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M12 11v5m0-8h.01" strokeLinecap="round" />
-              </svg>
-            </button>
+            {screen !== 'home' && (
+              <button
+                className="text-orange-600"
+                aria-label={t.openRules}
+                onClick={() => {
+                  if (screen === 'game') setPaused(true)
+                  setRulesOpen(true)
+                }}
+              >
+                <svg className="size-8 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2.5">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 11v5m0-8h.01" strokeLinecap="round" />
+                </svg>
+              </button>
+            )}
           </div>
         </header>
 
@@ -422,6 +438,33 @@ function App() {
                 {installPrompt ? t.installAction : t.installGotIt}
               </button>
             </div>
+          </div>
+        )}
+
+        {screen === 'home' && (
+          <div className="flex min-h-[calc(100dvh-10rem)] flex-col">
+            <div>
+              <h2 className="text-2xl font-bold">{t.chooseGame}</h2>
+              <p className="mt-1 text-stone-500">{t.gamesSubtitle}</p>
+            </div>
+            <div className="mt-6 space-y-3">
+              <button
+                className="flex w-full items-center gap-4 rounded-2xl bg-orange-50 p-4 text-left ring-2 ring-orange-100 transition hover:bg-orange-100 focus:outline-none focus:ring-orange-400"
+                onClick={() => setScreen('setup')}
+              >
+                <img className="size-14 rounded-2xl" src={`${baseUrl}icon-192.png`} alt="" />
+                <span className="text-xl font-black">Malice</span>
+              </button>
+              {placeholderGames.map((index) => (
+                <div className="flex items-center gap-4 rounded-2xl bg-stone-100 p-4 opacity-60" key={index}>
+                  <img className="size-14 rounded-2xl grayscale" src={`${baseUrl}icon-192.png`} alt="" />
+                  <span className="text-xl font-black text-stone-500">{t.comingSoon}</span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-auto pb-3 pt-6 text-center text-xs text-orange-600">
+              <a className="font-semibold" href="https://www.linkedin.com/in/matiss-judins-319235228/" target="_blank" rel="noreferrer">MatissJ</a>
+            </p>
           </div>
         )}
 
