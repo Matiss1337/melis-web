@@ -8,6 +8,10 @@ const fillPlayers = async (user: ReturnType<typeof userEvent.setup>, names: stri
   }
 }
 
+const openMelis = async (user: ReturnType<typeof userEvent.setup>) => {
+  await user.click(screen.getByRole('button', { name: 'Melis' }))
+}
+
 describe('App', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -19,6 +23,12 @@ describe('App', () => {
     const user = userEvent.setup()
 
     render(<App />)
+
+    expect(screen.getByRole('heading', { name: 'Spēles' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Melis' })).toBeInTheDocument()
+    expect(screen.getAllByText('Coming soon')).toHaveLength(5)
+
+    await openMelis(user)
 
     expect(screen.getByRole('heading', { name: 'Spēlētāji' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sākt spēli' })).toBeDisabled()
@@ -35,6 +45,7 @@ describe('App', () => {
 
     render(<App />)
 
+    await openMelis(user)
     await fillPlayers(user, ['Anna', 'Berts', 'Cēsis'], 'Spēlētājs')
     await user.click(screen.getByRole('button', { name: 'Sākt spēli' }))
 
