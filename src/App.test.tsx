@@ -1,6 +1,7 @@
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
+import { silentShowWords } from './silentShowWords'
 
 const fillPlayers = async (user: ReturnType<typeof userEvent.setup>, names: string[], placeholder: string) => {
   for (const [index, name] of names.entries()) {
@@ -27,7 +28,8 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: 'Spēles' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Melis' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Tick Tock' })).toBeInTheDocument()
-    expect(screen.getAllByText('Coming soon')).toHaveLength(4)
+    expect(screen.getByRole('button', { name: 'Mēmais šovs' })).toBeInTheDocument()
+    expect(screen.getAllByText('Coming soon')).toHaveLength(3)
 
     await openMelis(user)
 
@@ -106,5 +108,34 @@ describe('App', () => {
 
     expect(screen.getByRole('button', { name: 'Tick Tock 1' })).toHaveTextContent('')
     expect(screen.getByRole('button', { name: 'Tick Tock 2' })).toHaveTextContent('')
+  })
+
+  it('starts mēmais šovs with simple one-word prompts and rules', async () => {
+    const user = userEvent.setup()
+    jest.spyOn(Math, 'random')
+      .mockReturnValueOnce(0)
+      .mockReturnValueOnce(1 / silentShowWords.length)
+
+    render(<App />)
+
+    expect(silentShowWords).toHaveLength(300)
+    expect(silentShowWords.every((word) => !/\s/.test(word))).toBe(true)
+
+    await user.click(screen.getByRole('button', { name: 'Mēmais šovs' }))
+
+    expect(screen.getByRole('heading', { name: 'Mēmais šovs' })).toBeInTheDocument()
+    expect(screen.getByText('1 vārds')).toBeInTheDocument()
+    expect(screen.getByText(silentShowWords[0])).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Atvērt noteikumus' }))
+
+    expect(screen.getByRole('heading', { name: 'Spēles noteikumi' })).toBeInTheDocument()
+    expect(screen.getByText('Rādīšana')).toBeInTheDocument()
+    expect(screen.getByText('Pagaidām katrs uzdevums ir viens vārds.')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Aizvērt noteikumus' }))
+    await user.click(screen.getByRole('button', { name: 'Nākamais vārds' }))
+
+    expect(screen.getByText(silentShowWords[1])).toBeInTheDocument()
   })
 })

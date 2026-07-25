@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import lvLocationsSource from '../locations.md?raw'
 import { baseUrl } from './baseUrl'
+import { silentShowWords } from './silentShowWords'
 
-type Screen = 'home' | 'setup' | 'roles' | 'game' | 'finished' | 'tickTock'
+type Screen = 'home' | 'setup' | 'roles' | 'game' | 'finished' | 'tickTock' | 'silentShow'
 type SavedGame = { players: string[]; minutes: number }
 type PlayedLocation = { locationIndex: number; playedAt: number }
 type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }
@@ -14,7 +15,7 @@ const installPromptKey = 'melis-install-prompt-seen'
 const weekInMilliseconds = 7 * 24 * 60 * 60 * 1000
 const parseLocations = (source: string) => source.match(/^\d+\. (.+)$/gm)?.map((line) => line.replace(/^\d+\. /, '')) ?? []
 const locations = parseLocations(lvLocationsSource)
-const placeholderGames = Array.from({ length: 4 }, (_, index) => index)
+const placeholderGames = Array.from({ length: 3 }, (_, index) => index)
 const tickTockLines = [
   [0, 1, 2],
   [3, 4, 5],
@@ -31,6 +32,7 @@ const tickTockRows = [
   [6, 7, 8],
 ] as const
 const createTickTockBoard = (): TickTockCell[] => Array.from({ length: 9 }, () => null)
+const randomSilentShowWord = () => silentShowWords[Math.floor(Math.random() * silentShowWords.length)] ?? silentShowWords[0]
 
 const t = {
   gamesTitle: 'Spēles',
@@ -38,6 +40,9 @@ const t = {
   gamesSubtitle: 'Izvēlies spēli vakaram.',
   comingSoon: 'Coming soon',
   tickTock: 'Tick Tock',
+  silentShow: 'Mēmais šovs',
+  oneWordDifficulty: '1 vārds',
+  nextWord: 'Nākamais vārds',
   reset: 'Reset',
   openSettings: 'Atvērt iestatījumus',
   openRules: 'Atvērt noteikumus',
@@ -73,6 +78,20 @@ const t = {
     {
       title: 'Reset',
       body: 'Nospied Reset, lai sāktu no sākuma.',
+    },
+  ],
+  silentShowRules: [
+    {
+      title: 'Rādīšana',
+      body: 'Izlozēto vārdu rāda ar žestiem un mīmiku. Runāt, izdot skaņas un norādīt uz priekšmetiem telpā nedrīkst.',
+    },
+    {
+      title: 'Minēšana',
+      body: 'Pārējie min skaļi. Kad vārds uzminēts, spied “Nākamais vārds”.',
+    },
+    {
+      title: 'Grūtība',
+      body: 'Pagaidām katrs uzdevums ir viens vārds.',
     },
   ],
   installTitle: 'Instalēt Melis',
@@ -148,6 +167,7 @@ function App() {
   const [installOpen, setInstallOpen] = useState(false)
   const [tickTockBoard, setTickTockBoard] = useState<TickTockCell[]>(createTickTockBoard)
   const [tickTockTurn, setTickTockTurn] = useState<Exclude<TickTockCell, null>>('X')
+  const [silentShowWord, setSilentShowWord] = useState(silentShowWords[0])
 
   const validPlayers = players.map((player) => player.trim()).filter(Boolean)
   const canStart = players.length >= 3 && players.every((player) => player.trim().length > 0)
@@ -262,8 +282,9 @@ function App() {
     setTickTockBoard((board) => board.map((cell, cellIndex) => cellIndex === index ? tickTockTurn : cell))
     setTickTockTurn((turn) => turn === 'X' ? 'O' : 'X')
   }
-  const rules = screen === 'tickTock' ? t.tickTockRules : t.rules
-  const gameTitle = screen === 'home' ? t.gamesTitle : screen === 'tickTock' ? t.tickTock : 'Melis'
+  const nextSilentShowWord = () => setSilentShowWord(randomSilentShowWord())
+  const rules = screen === 'tickTock' ? t.tickTockRules : screen === 'silentShow' ? t.silentShowRules : t.rules
+  const gameTitle = screen === 'home' ? t.gamesTitle : screen === 'tickTock' ? t.tickTock : screen === 'silentShow' ? t.silentShow : 'Melis'
 
   return (
     <main className="min-h-dvh bg-orange-50 px-4 py-6 text-stone-900 sm:flex sm:items-center sm:justify-center">
@@ -274,7 +295,7 @@ function App() {
             <h1 className="text-3xl font-black tracking-tight text-orange-600">{gameTitle}</h1>
           </div>
           <div className="flex items-center gap-3">
-            {screen !== 'home' && screen !== 'setup' && screen !== 'tickTock' && (
+            {screen !== 'home' && screen !== 'setup' && screen !== 'tickTock' && screen !== 'silentShow' && (
               <button className="text-orange-600" aria-label={t.openSettings} onClick={openSettings}>
                 <svg className="size-8 fill-current" viewBox="0 0 24 24">
                   <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.96-.7 2.8l1.46 1.46A7.94 7.94 0 0 0 20 12c0-4.42-3.58-8-8-8Zm-6.76 4.74A7.94 7.94 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3c-3.31 0-6-2.69-6-6 0-1.01.25-1.96.7-2.8L5.24 8.74Z" />
@@ -366,6 +387,16 @@ function App() {
                 <div className="flex size-14 items-center justify-center rounded-2xl bg-stone-900 text-2xl font-black text-white" aria-hidden="true">X</div>
                 <span className="text-xl font-black">{t.tickTock}</span>
               </button>
+              <button
+                className="flex w-full items-center gap-4 rounded-2xl bg-orange-50 p-4 text-left ring-2 ring-orange-100 transition hover:bg-orange-100 focus:outline-none focus:ring-orange-400"
+                onClick={() => {
+                  nextSilentShowWord()
+                  setScreen('silentShow')
+                }}
+              >
+                <div className="flex size-14 items-center justify-center rounded-2xl bg-stone-900 text-2xl font-black text-white" aria-hidden="true">M</div>
+                <span className="text-xl font-black">{t.silentShow}</span>
+              </button>
               {placeholderGames.map((index) => (
                 <div className="flex items-center gap-4 rounded-2xl bg-stone-100 p-4 opacity-60" key={index}>
                   <img className="size-14 rounded-2xl grayscale" src={`${baseUrl}icon-192.png`} alt="" />
@@ -376,6 +407,16 @@ function App() {
             <p className="mt-auto pb-3 pt-6 text-center text-xs text-orange-600">
               <a className="font-semibold" href="https://www.linkedin.com/in/matiss-judins-319235228/" target="_blank" rel="noreferrer">MatissJ</a>
             </p>
+          </div>
+        )}
+
+        {screen === 'silentShow' && (
+          <div className="flex min-h-[600px] flex-col items-center justify-center gap-6 text-center">
+            <div className="w-full rounded-2xl bg-orange-50 p-6 ring-2 ring-orange-100">
+              <p className="text-sm font-bold uppercase tracking-wider text-orange-500">{t.oneWordDifficulty}</p>
+              <p className="mt-3 text-5xl font-black text-stone-900">{silentShowWord}</p>
+            </div>
+            <button className="w-full rounded-2xl bg-orange-500 py-4 text-lg font-black text-white" onClick={nextSilentShowWord}>{t.nextWord}</button>
           </div>
         )}
 
