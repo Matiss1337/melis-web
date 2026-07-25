@@ -26,11 +26,11 @@ function GamesHub() {
             <span className="text-xl font-black">Melis</span>
           </Link>
           <Link className="flex w-full items-center gap-4 rounded-2xl bg-orange-50 p-4 ring-2 ring-orange-100 transition hover:bg-orange-100 focus:outline-none focus:ring-orange-400" to="/games/tik-tok">
-            <div className="flex size-14 items-center justify-center rounded-2xl bg-orange-500 text-2xl font-black text-white" aria-hidden="true">X</div>
+            <img className="size-14 rounded-2xl" src={`${baseUrl}tik-tok.png`} alt="" />
             <span className="text-xl font-black">Tik Tok</span>
           </Link>
           <Link className="flex w-full items-center gap-4 rounded-2xl bg-orange-50 p-4 ring-2 ring-orange-100 transition hover:bg-orange-100 focus:outline-none focus:ring-orange-400" to="/games/memais-sovs">
-            <div className="flex size-14 items-center justify-center rounded-2xl bg-orange-500 text-2xl font-black text-white" aria-hidden="true">M</div>
+            <img className="size-14 rounded-2xl" src={`${baseUrl}memais-sovs.png`} alt="" />
             <span className="text-xl font-black">Mēmais šovs</span>
           </Link>
           {placeholders.map((index) => (

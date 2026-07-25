@@ -6,6 +6,16 @@ test.beforeEach(async ({ page }) => {
   await page.reload()
 })
 
+test('shows the supplied icons at the shared game icon size', async ({ page }) => {
+  for (const [name, source] of [['Tik Tok', 'tik-tok.png'], ['Mēmais šovs', 'memais-sovs.png']]) {
+    const icon = page.getByRole('link', { name }).locator('img')
+    await expect(icon).toHaveAttribute('src', new RegExp(`${source}$`))
+    const box = await icon.boundingBox()
+    expect(box).not.toBeNull()
+    expect(Math.max(box!.width, box!.height)).toBeLessThanOrEqual(56)
+  }
+})
+
 test('opens every game from the hub and returns home', async ({ page }) => {
   for (const name of ['Melis', 'Tik Tok', 'Mēmais šovs']) {
     await page.getByRole('link', { name }).click()
