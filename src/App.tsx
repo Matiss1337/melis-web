@@ -61,6 +61,20 @@ const t = {
       body: 'Spēlētāji uzvar, ja atrod Meli un viņš neuzmin lokāciju. Melis uzvar, ja uzmin lokāciju pirms viņu atklāj.',
     },
   ],
+  tickTockRules: [
+    {
+      title: 'Gājieni',
+      body: 'Spēlētāji pēc kārtas spiež tukšu lauciņu. Pirmais gājiens ir X.',
+    },
+    {
+      title: 'Uzvara',
+      body: 'Uzvar tas, kurš savieno trīs savus simbolus rindā, kolonnā vai diagonālē.',
+    },
+    {
+      title: 'Reset',
+      body: 'Nospied Reset, lai sāktu no sākuma.',
+    },
+  ],
   installTitle: 'Instalēt Melis',
   installPrompt: 'Pievieno Melis sākuma ekrānam ātrai piekļuvei.',
   installIos: 'Safari izvēlnē nospied Kopīgot un pēc tam “Pievienot sākuma ekrānam”.',
@@ -248,6 +262,7 @@ function App() {
     setTickTockBoard((board) => board.map((cell, cellIndex) => cellIndex === index ? tickTockTurn : cell))
     setTickTockTurn((turn) => turn === 'X' ? 'O' : 'X')
   }
+  const rules = screen === 'tickTock' ? t.tickTockRules : t.rules
   const gameTitle = screen === 'home' ? t.gamesTitle : screen === 'tickTock' ? t.tickTock : 'Melis'
 
   return (
@@ -266,7 +281,7 @@ function App() {
                 </svg>
               </button>
             )}
-            {screen !== 'home' && screen !== 'tickTock' && (
+            {screen !== 'home' && (
               <button
                 className="text-orange-600"
                 aria-label={t.openRules}
@@ -290,7 +305,7 @@ function App() {
               <div>
                 <h2 className="text-lg font-black">{t.rulesTitle}</h2>
                 <div className="mt-3 space-y-3 text-sm leading-5 text-stone-600">
-                  {t.rules.map((rule) => (
+                  {rules.map((rule) => (
                     <section key={rule.title}>
                       <h3 className="font-bold text-stone-900">{rule.title}</h3>
                       <p>{rule.body}</p>
