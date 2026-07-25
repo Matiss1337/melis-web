@@ -167,7 +167,7 @@ function App() {
   const [installOpen, setInstallOpen] = useState(false)
   const [tickTockBoard, setTickTockBoard] = useState<TickTockCell[]>(createTickTockBoard)
   const [tickTockTurn, setTickTockTurn] = useState<Exclude<TickTockCell, null>>('X')
-  const [silentShowWord, setSilentShowWord] = useState(silentShowWords[0])
+  const [silentShowWord, setSilentShowWord] = useState<string>(silentShowWords[0])
 
   const validPlayers = players.map((player) => player.trim()).filter(Boolean)
   const canStart = players.length >= 3 && players.every((player) => player.trim().length > 0)
