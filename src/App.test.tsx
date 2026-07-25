@@ -38,62 +38,6 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: 'Sākt spēli' })).toBeEnabled()
   })
 
-  it('switches to English and reveals an English location during the role journey', async () => {
-    const user = userEvent.setup()
-    jest.spyOn(Math, 'random')
-      .mockReturnValueOnce(0)
-      .mockReturnValueOnce(0)
-
-    render(<App />)
-
-    await user.click(screen.getByRole('button', { name: 'Pārslēgt uz angļu valodu' }))
-    await openMelis(user)
-    await fillPlayers(user, ['Alice', 'Bob', 'Charlie'], 'Player')
-    await user.click(screen.getByRole('button', { name: 'Start game' }))
-
-    await user.click(screen.getByRole('button', { name: 'View location' }))
-    expect(screen.getByText('You are the Spy')).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: 'Hide and pass on' }))
-    await user.click(screen.getByRole('button', { name: 'View location' }))
-
-    expect(screen.getByText('Location')).toBeInTheDocument()
-    expect(screen.getByText('Park')).toBeInTheDocument()
-  })
-
-  it('cycles LV → EN → RU → LV and reveals a Russian location', async () => {
-    const user = userEvent.setup()
-    jest.spyOn(Math, 'random')
-      .mockReturnValueOnce(0)
-      .mockReturnValueOnce(0)
-
-    render(<App />)
-
-    await user.click(screen.getByRole('button', { name: 'Pārslēgt uz angļu valodu' }))
-    await openMelis(user)
-    expect(screen.getByRole('heading', { name: 'Players' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Switch to Russian' })).toHaveTextContent('EN')
-
-    await user.click(screen.getByRole('button', { name: 'Switch to Russian' }))
-    expect(screen.getByRole('heading', { name: 'Игроки' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Переключить на латышский' })).toHaveTextContent('RU')
-
-    await fillPlayers(user, ['Аня', 'Боря', 'Катя'], 'Игрок')
-    await user.click(screen.getByRole('button', { name: 'Начать игру' }))
-
-    await user.click(screen.getByRole('button', { name: 'Посмотреть локацию' }))
-    expect(screen.getByText('Ты шпион')).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: 'Скрыть и передать дальше' }))
-    await user.click(screen.getByRole('button', { name: 'Посмотреть локацию' }))
-
-    expect(screen.getByText('Локация')).toBeInTheDocument()
-    expect(screen.getByText('Парк')).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: 'Переключить на латышский' }))
-    expect(screen.getByRole('button', { name: 'Pārslēgt uz angļu valodu' })).toHaveTextContent('LV')
-  })
-
   it('completes the journey, pauses the timer, and resets with play again', async () => {
     jest.useFakeTimers()
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })

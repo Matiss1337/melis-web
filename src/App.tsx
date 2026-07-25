@@ -1,204 +1,73 @@
 import { useEffect, useMemo, useState } from 'react'
 import lvLocationsSource from '../locations.md?raw'
-import enLocationsSource from '../locations.en.md?raw'
-import ruLocationsSource from '../locations.ru.md?raw'
 import { baseUrl } from './baseUrl'
 
 type Screen = 'home' | 'setup' | 'roles' | 'game' | 'finished'
-type Language = 'lv' | 'en' | 'ru'
 type SavedGame = { players: string[]; minutes: number }
 type PlayedLocation = { locationIndex: number; playedAt: number }
 type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }
 
 const storageKey = 'melis-settings'
-const languageKey = 'melis-language'
 const playedLocationsKey = 'melis-played-locations'
 const installPromptKey = 'melis-install-prompt-seen'
 const weekInMilliseconds = 7 * 24 * 60 * 60 * 1000
-const languageOrder: Language[] = ['lv', 'en', 'ru']
-const nextLanguage = (language: Language): Language => languageOrder[(languageOrder.indexOf(language) + 1) % languageOrder.length]
-const languageCodes: Record<Language, string> = { lv: 'LV', en: 'EN', ru: 'RU' }
 const parseLocations = (source: string) => source.match(/^\d+\. (.+)$/gm)?.map((line) => line.replace(/^\d+\. /, '')) ?? []
-const locationsByLanguage: Record<Language, string[]> = {
-  lv: parseLocations(lvLocationsSource),
-  en: parseLocations(enLocationsSource),
-  ru: parseLocations(ruLocationsSource),
-}
+const locations = parseLocations(lvLocationsSource)
 const placeholderGames = Array.from({ length: 5 }, (_, index) => index)
 
-const translations = {
-  lv: {
-    gamesTitle: 'Spēles',
-    chooseGame: 'Izvēlies spēli',
-    gamesSubtitle: 'Izvēlies spēli vakaram.',
-    comingSoon: 'Coming soon',
-    switchLanguageLabel: 'Pārslēgt uz angļu valodu',
-    openSettings: 'Atvērt iestatījumus',
-    openRules: 'Atvērt noteikumus',
-    closeRules: 'Aizvērt noteikumus',
-    rulesTitle: 'Spēles noteikumi',
-    rules: [
-      {
-        title: 'Iestatīšana',
-        body: 'Pievieno spēlētājus, izvēlies spēles ilgumu un nospied “Sākt spēli”.',
-      },
-      {
-        title: 'Lokācijas apskate',
-        body: 'Visi, izņemot Meli, slepeni redz vienu un to pašu lokāciju. Melis redz tikai “Tu esi Melis”, tāpēc nezina kopīgo lokāciju.',
-      },
-      {
-        title: 'Spēle',
-        body: 'Uzdodiet jautājumus par lokāciju. Pārējiem jāatbild pietiekami skaidri, lai pierādītu, ka viņi zina vietu, bet neatklātu to Melim.',
-      },
-      {
-        title: 'Uzvara',
-        body: 'Spēlētāji uzvar, ja atrod Meli un viņš neuzmin lokāciju. Melis uzvar, ja uzmin lokāciju pirms viņu atklāj.',
-      },
-    ],
-    installTitle: 'Instalēt Melis',
-    installPrompt: 'Pievieno Melis sākuma ekrānam ātrai piekļuvei.',
-    installIos: 'Safari izvēlnē nospied Kopīgot un pēc tam “Pievienot sākuma ekrānam”.',
-    installLater: 'Vēlāk',
-    installAction: 'Instalēt',
-    installGotIt: 'Sapratu',
-    playersTitle: 'Spēlētāji',
-    playersHelp: 'Pievieno vismaz 3 spēlētājus.',
-    playerPlaceholder: 'Spēlētājs',
-    removePlayer: 'Noņemt spēlētāju',
-    addPlayer: '+ Pievienot spēlētāju',
-    durationLabel: 'Spēles ilgums',
-    minuteLabel: 'minūtes',
-    startGame: 'Sākt spēli',
-    saveAndStart: 'Saglabāt / Sākt spēli',
-    viewLocation: 'Skatīt lokāciju',
-    startRound: 'Sākt raundu',
-    hideAndPass: 'Paslēpt un nodot tālāk',
-    youAreSpy: 'Tu esi Melis',
-    locationLabel: 'Lokācija',
-    timerRunning: 'Laiks rit',
-    timerFinished: 'Laiks ir beidzies',
-    resume: 'Turpināt',
-    pause: 'Pauze',
-    playAgain: 'Spēlēt vēlreiz',
-  },
-  en: {
-    gamesTitle: 'Games',
-    chooseGame: 'Pick a game',
-    gamesSubtitle: 'Choose a game for the night.',
-    comingSoon: 'Coming soon',
-    switchLanguageLabel: 'Switch to Russian',
-    openSettings: 'Open settings',
-    openRules: 'Open rules',
-    closeRules: 'Close rules',
-    rulesTitle: 'Game rules',
-    rules: [
-      {
-        title: 'Setup',
-        body: 'Add players, choose the game length, and press “Start game”.',
-      },
-      {
-        title: 'Location reveal',
-        body: 'Everyone except the Spy secretly sees the same location. The Spy only sees “You are the Spy”, so they do not know the shared location.',
-      },
-      {
-        title: 'Game',
-        body: 'Ask questions about the location. Everyone else should answer clearly enough to prove they know the place without revealing it to the Spy.',
-      },
-      {
-        title: 'Winning',
-        body: 'Players win if they find the Spy and the Spy does not guess the location. The Spy wins if they guess the location before being exposed.',
-      },
-    ],
-    installTitle: 'Install Melis',
-    installPrompt: 'Add Melis to your home screen for quick access.',
-    installIos: 'In Safari, tap Share, then “Add to Home Screen”.',
-    installLater: 'Later',
-    installAction: 'Install',
-    installGotIt: 'Got it',
-    playersTitle: 'Players',
-    playersHelp: 'Add at least 3 players.',
-    playerPlaceholder: 'Player',
-    removePlayer: 'Remove player',
-    addPlayer: '+ Add player',
-    durationLabel: 'Game length',
-    minuteLabel: 'minutes',
-    startGame: 'Start game',
-    saveAndStart: 'Save / Start game',
-    viewLocation: 'View location',
-    startRound: 'Start round',
-    hideAndPass: 'Hide and pass on',
-    youAreSpy: 'You are the Spy',
-    locationLabel: 'Location',
-    timerRunning: 'Time is running',
-    timerFinished: 'Time is up',
-    resume: 'Resume',
-    pause: 'Pause',
-    playAgain: 'Play again',
-  },
-  ru: {
-    gamesTitle: 'Игры',
-    chooseGame: 'Выберите игру',
-    gamesSubtitle: 'Выберите игру на вечер.',
-    comingSoon: 'Coming soon',
-    switchLanguageLabel: 'Переключить на латышский',
-    openSettings: 'Открыть настройки',
-    openRules: 'Открыть правила',
-    closeRules: 'Закрыть правила',
-    rulesTitle: 'Правила игры',
-    rules: [
-      {
-        title: 'Подготовка',
-        body: 'Добавьте игроков, выберите длительность игры и нажмите «Начать игру».',
-      },
-      {
-        title: 'Просмотр локации',
-        body: 'Все, кроме Шпиона, тайно видят одну и ту же локацию. Шпион видит только «Ты шпион», поэтому не знает общую локацию.',
-      },
-      {
-        title: 'Игра',
-        body: 'Задавайте вопросы о локации. Остальные должны отвечать достаточно ясно, чтобы доказать, что знают место, но не раскрыть его Шпиону.',
-      },
-      {
-        title: 'Победа',
-        body: 'Игроки побеждают, если находят Шпиона и он не угадывает локацию. Шпион побеждает, если угадывает локацию до разоблачения.',
-      },
-    ],
-    installTitle: 'Установить Melis',
-    installPrompt: 'Добавьте Melis на домашний экран для быстрого доступа.',
-    installIos: 'В Safari нажмите «Поделиться», затем «На экран «Домой»».',
-    installLater: 'Позже',
-    installAction: 'Установить',
-    installGotIt: 'Понятно',
-    playersTitle: 'Игроки',
-    playersHelp: 'Добавьте минимум 3 игроков.',
-    playerPlaceholder: 'Игрок',
-    removePlayer: 'Удалить игрока',
-    addPlayer: '+ Добавить игрока',
-    durationLabel: 'Длительность игры',
-    minuteLabel: 'минут',
-    startGame: 'Начать игру',
-    saveAndStart: 'Сохранить / Начать игру',
-    viewLocation: 'Посмотреть локацию',
-    startRound: 'Начать раунд',
-    hideAndPass: 'Скрыть и передать дальше',
-    youAreSpy: 'Ты шпион',
-    locationLabel: 'Локация',
-    timerRunning: 'Время идёт',
-    timerFinished: 'Время вышло',
-    resume: 'Продолжить',
-    pause: 'Пауза',
-    playAgain: 'Играть снова',
-  },
+const t = {
+  gamesTitle: 'Spēles',
+  chooseGame: 'Izvēlies spēli',
+  gamesSubtitle: 'Izvēlies spēli vakaram.',
+  comingSoon: 'Coming soon',
+  openSettings: 'Atvērt iestatījumus',
+  openRules: 'Atvērt noteikumus',
+  closeRules: 'Aizvērt noteikumus',
+  rulesTitle: 'Spēles noteikumi',
+  rules: [
+    {
+      title: 'Iestatīšana',
+      body: 'Pievieno spēlētājus, izvēlies spēles ilgumu un nospied “Sākt spēli”.',
+    },
+    {
+      title: 'Lokācijas apskate',
+      body: 'Visi, izņemot Meli, slepeni redz vienu un to pašu lokāciju. Melis redz tikai “Tu esi Melis”, tāpēc nezina kopīgo lokāciju.',
+    },
+    {
+      title: 'Spēle',
+      body: 'Uzdodiet jautājumus par lokāciju. Pārējiem jāatbild pietiekami skaidri, lai pierādītu, ka viņi zina vietu, bet neatklātu to Melim.',
+    },
+    {
+      title: 'Uzvara',
+      body: 'Spēlētāji uzvar, ja atrod Meli un viņš neuzmin lokāciju. Melis uzvar, ja uzmin lokāciju pirms viņu atklāj.',
+    },
+  ],
+  installTitle: 'Instalēt Melis',
+  installPrompt: 'Pievieno Melis sākuma ekrānam ātrai piekļuvei.',
+  installIos: 'Safari izvēlnē nospied Kopīgot un pēc tam “Pievienot sākuma ekrānam”.',
+  installLater: 'Vēlāk',
+  installAction: 'Instalēt',
+  installGotIt: 'Sapratu',
+  playersTitle: 'Spēlētāji',
+  playersHelp: 'Pievieno vismaz 3 spēlētājus.',
+  playerPlaceholder: 'Spēlētājs',
+  removePlayer: 'Noņemt spēlētāju',
+  addPlayer: '+ Pievienot spēlētāju',
+  durationLabel: 'Spēles ilgums',
+  minuteLabel: 'minūtes',
+  startGame: 'Sākt spēli',
+  saveAndStart: 'Saglabāt / Sākt spēli',
+  viewLocation: 'Skatīt lokāciju',
+  startRound: 'Sākt raundu',
+  hideAndPass: 'Paslēpt un nodot tālāk',
+  youAreSpy: 'Tu esi Melis',
+  locationLabel: 'Lokācija',
+  timerRunning: 'Laiks rit',
+  timerFinished: 'Laiks ir beidzies',
+  resume: 'Turpināt',
+  pause: 'Pauze',
+  playAgain: 'Spēlēt vēlreiz',
 } as const
-
-function isLanguage(value: string | null): value is Language {
-  return value === 'lv' || value === 'en' || value === 'ru'
-}
-
-function loadLanguage(): Language {
-  const value = localStorage.getItem(languageKey)
-  return isLanguage(value) ? value : 'lv'
-}
 
 function loadSettings(): SavedGame {
   try {
@@ -210,7 +79,7 @@ function loadSettings(): SavedGame {
   return { players: ['', '', ''], minutes: 10 }
 }
 
-function loadRecentLocations(language: Language): PlayedLocation[] {
+function loadRecentLocations(): PlayedLocation[] {
   const oldestAllowed = Date.now() - weekInMilliseconds
   try {
     const value = JSON.parse(localStorage.getItem(playedLocationsKey) ?? '[]')
@@ -220,7 +89,7 @@ function loadRecentLocations(language: Language): PlayedLocation[] {
         if (typeof item.locationIndex === 'number') return [{ locationIndex: item.locationIndex, playedAt: item.playedAt }]
         if (typeof item.name !== 'string') return []
 
-        const locationIndex = locationsByLanguage[language].indexOf(item.name)
+        const locationIndex = locations.indexOf(item.name)
         return locationIndex === -1 ? [] : [{ locationIndex, playedAt: item.playedAt }]
       })
     }
@@ -232,9 +101,7 @@ function loadRecentLocations(language: Language): PlayedLocation[] {
 
 function App() {
   const saved = useMemo(loadSettings, [])
-  const initialLanguage = useMemo(loadLanguage, [])
   const [screen, setScreen] = useState<Screen>('home')
-  const [language, setLanguage] = useState<Language>(initialLanguage)
   const [players, setPlayers] = useState(saved.players)
   const [minutes, setMinutes] = useState(saved.minutes)
   const [revealed, setRevealed] = useState(0)
@@ -247,16 +114,9 @@ function App() {
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null)
   const [installOpen, setInstallOpen] = useState(false)
 
-  const t = translations[language]
-  const locations = locationsByLanguage[language]
   const validPlayers = players.map((player) => player.trim()).filter(Boolean)
   const canStart = players.length >= 3 && players.every((player) => player.trim().length > 0)
   const save = () => localStorage.setItem(storageKey, JSON.stringify({ players: validPlayers, minutes }))
-
-  useEffect(() => {
-    localStorage.setItem(languageKey, language)
-    document.documentElement.lang = language
-  }, [language])
 
   useEffect(() => {
     if (screen !== 'game' || paused || secondsLeft <= 0) return
@@ -291,7 +151,7 @@ function App() {
 
   const start = () => {
     if (!canStart || locations.length === 0) return
-    const recentLocations = loadRecentLocations(language)
+    const recentLocations = loadRecentLocations()
     const recentIndexes = new Set(recentLocations.map((item) => item.locationIndex))
     const availableLocationIndexes = locations.map((_, index) => index).filter((index) => !recentIndexes.has(index))
     const nextLocationIndexes = availableLocationIndexes.length > 0 ? availableLocationIndexes : locations.map((_, index) => index)
@@ -361,18 +221,6 @@ function App() {
             <h1 className="text-3xl font-black tracking-tight text-orange-600">{gameTitle}</h1>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              className="flex items-center gap-1 rounded-full text-sm font-black text-orange-600"
-              aria-label={t.switchLanguageLabel}
-              title={t.switchLanguageLabel}
-              onClick={() => setLanguage((value) => nextLanguage(value))}
-            >
-              <svg className="size-7 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2.2">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M3 12h18M12 3c2.2 2.4 3.3 5.4 3.3 9S14.2 18.6 12 21c-2.2-2.4-3.3-5.4-3.3-9S9.8 5.4 12 3Z" />
-              </svg>
-              <span>{languageCodes[language]}</span>
-            </button>
             {screen !== 'home' && screen !== 'setup' && (
               <button className="text-orange-600" aria-label={t.openSettings} onClick={openSettings}>
                 <svg className="size-8 fill-current" viewBox="0 0 24 24">
