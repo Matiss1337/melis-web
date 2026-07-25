@@ -18,7 +18,7 @@ export default function MemaisSovsGame({ onHome }: { onHome: () => void }) {
   }
 
   return (
-    <GameShell title="Mēmais šovs" rules={rules} onHome={onHome}>
+    <GameShell title="Mēmais šovs" icon="memais-sovs.png" rules={rules} onHome={onHome}>
       <div className="flex min-h-[600px] flex-col items-center justify-center gap-6 text-center">
         <div className="w-full rounded-2xl bg-orange-50 p-6 ring-2 ring-orange-100">
           <p className="text-5xl font-black text-stone-900">{revealed ? word : '???'}</p>
