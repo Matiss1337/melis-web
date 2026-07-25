@@ -112,7 +112,7 @@ export default function MelisGame({ onHome }: { onHome: () => void }) {
     ? 'Skatīt lokāciju'
     : revealed === validPlayers.length - 0.5 ? 'Sākt raundu' : 'Paslēpt un nodot tālāk'
   const headerAction = screen !== 'setup' && (
-    <button className="text-orange-600" aria-label="Atvērt iestatījumus" onClick={openSettings}>
+    <button className="text-orange-500" aria-label="Atvērt iestatījumus" onClick={openSettings}>
       <svg className="size-8 fill-current" viewBox="0 0 24 24">
         <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.96-.7 2.8l1.46 1.46A7.94 7.94 0 0 0 20 12c0-4.42-3.58-8-8-8Zm-6.76 4.74A7.94 7.94 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3c-3.31 0-6-2.69-6-6 0-1.01.25-1.96.7-2.8L5.24 8.74Z" />
       </svg>
@@ -122,6 +122,7 @@ export default function MelisGame({ onHome }: { onHome: () => void }) {
   return (
     <GameShell
       title="Melis"
+      icon="melis.png"
       rules={rules}
       onHome={onHome}
       headerAction={headerAction}
@@ -134,11 +135,11 @@ export default function MelisGame({ onHome }: { onHome: () => void }) {
             <div className="space-y-3">
               {players.map((player, index) => (
                 <div className="flex gap-2" key={index}>
-                  <input className="w-full rounded-xl bg-stone-100 px-4 py-3 outline-none ring-orange-400 focus:ring-2" placeholder={`Spēlētājs ${index + 1}`} value={player} onChange={(event) => setPlayers((value) => value.map((name, item) => item === index ? event.target.value : name))} />
+                  <input className="w-full rounded-xl bg-stone-100 px-4 py-3 outline-none ring-orange-500 focus:ring-2" placeholder={`Spēlētājs ${index + 1}`} value={player} onChange={(event) => setPlayers((value) => value.map((name, item) => item === index ? event.target.value : name))} />
                   {players.length > 3 && <button className="rounded-xl px-3 !text-[20px] font-semibold leading-none text-stone-400" aria-label={`Noņemt spēlētāju ${index + 1}`} onClick={() => setPlayers((value) => value.filter((_, item) => item !== index))}>×</button>}
                 </div>
               ))}
-              <button className="font-bold text-orange-600" onClick={() => setPlayers((value) => [...value, ''])}>+ Pievienot spēlētāju</button>
+              <button className="font-bold text-orange-500" onClick={() => setPlayers((value) => [...value, ''])}>+ Pievienot spēlētāju</button>
             </div>
             <label className="block">
               <span className="mb-2 block font-bold">Spēles ilgums</span>

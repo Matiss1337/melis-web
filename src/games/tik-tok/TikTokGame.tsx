@@ -5,6 +5,7 @@ type Cell = 'X' | 'O' | null
 
 const lines = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]] as const
 const rows = [[0, 1, 2], [3, 4, 5], [6, 7, 8]] as const
+const lineExtension = 0.22
 const rules: Rule[] = [
   { title: 'Gājieni', body: 'Spēlētāji pēc kārtas spiež tukšu lauciņu. Pirmais gājiens ir X.' },
   { title: 'Uzvara', body: 'Uzvar tas, kurš savieno trīs savus simbolus rindā, kolonnā vai diagonālē.' },
@@ -46,31 +47,33 @@ export default function TikTokGame({ onHome }: { onHome: () => void }) {
   }
 
   return (
-    <GameShell title="Tik Tok" rules={rules} onHome={onHome}>
+    <GameShell title="Tik Tok" icon="tik-tok.png" rules={rules} onHome={onHome}>
       <div className="flex min-h-[600px] flex-col items-center justify-center gap-6">
-        <div className="relative w-full space-y-3">
-          {rows.map((row) => (
-            <div className="flex gap-3" key={row.join('-')}>
-              {row.map((index) => (
-                <button
-                  className="flex aspect-square flex-1 items-center justify-center rounded-2xl bg-orange-50 text-orange-500 ring-2 ring-orange-100 disabled:cursor-default"
-                  aria-label={`Tik Tok ${index + 1}`}
-                  disabled={Boolean(board[index]) || Boolean(winner) || board.every(Boolean)}
-                  key={index}
-                  onClick={() => play(index)}
-                >
-                  {board[index] && <Mark mark={board[index]} className="size-16" />}
-                </button>
-              ))}
-            </div>
-          ))}
+        <div className="relative w-full">
+          <div className="space-y-3">
+            {rows.map((row) => (
+              <div className="flex gap-3" key={row.join('-')}>
+                {row.map((index) => (
+                  <button
+                    className="flex aspect-square flex-1 items-center justify-center rounded-2xl bg-orange-50 text-orange-500 ring-2 ring-orange-100 disabled:cursor-default"
+                    aria-label={`Tik Tok ${index + 1}`}
+                    disabled={Boolean(board[index]) || Boolean(winner) || board.every(Boolean)}
+                    key={index}
+                    onClick={() => play(index)}
+                  >
+                    {board[index] && <Mark mark={board[index]} className="size-16" />}
+                  </button>
+                ))}
+              </div>
+            ))}
+          </div>
           {winningLine && (
-            <svg className="pointer-events-none absolute inset-0 size-full text-orange-500" viewBox="0 0 3 3" preserveAspectRatio="none" aria-hidden="true">
+            <svg className="pointer-events-none absolute inset-0 size-full text-orange-500" viewBox="0 0 3.2 3.2" preserveAspectRatio="none" aria-hidden="true">
               <line
-                x1={winningLine[0] % 3 + 0.5 - Math.sign(winningLine[2] % 3 - winningLine[0] % 3) * 0.3}
-                y1={Math.floor(winningLine[0] / 3) + 0.5 - Math.sign(Math.floor(winningLine[2] / 3) - Math.floor(winningLine[0] / 3)) * 0.3}
-                x2={winningLine[2] % 3 + 0.5 + Math.sign(winningLine[2] % 3 - winningLine[0] % 3) * 0.3}
-                y2={Math.floor(winningLine[2] / 3) + 0.5 + Math.sign(Math.floor(winningLine[2] / 3) - Math.floor(winningLine[0] / 3)) * 0.3}
+                x1={winningLine[0] % 3 + 0.5 + (winningLine[0] % 3) * 0.1 - Math.sign(winningLine[2] % 3 - winningLine[0] % 3) * lineExtension}
+                y1={Math.floor(winningLine[0] / 3) + 0.5 + Math.floor(winningLine[0] / 3) * 0.1 - Math.sign(Math.floor(winningLine[2] / 3) - Math.floor(winningLine[0] / 3)) * lineExtension}
+                x2={winningLine[2] % 3 + 0.5 + (winningLine[2] % 3) * 0.1 + Math.sign(winningLine[2] % 3 - winningLine[0] % 3) * lineExtension}
+                y2={Math.floor(winningLine[2] / 3) + 0.5 + Math.floor(winningLine[2] / 3) * 0.1 + Math.sign(Math.floor(winningLine[2] / 3) - Math.floor(winningLine[0] / 3)) * lineExtension}
                 stroke="currentColor"
                 strokeWidth="0.04"
                 strokeLinecap="round"

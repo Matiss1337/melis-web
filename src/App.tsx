@@ -14,7 +14,7 @@ function GamesHub() {
       <section className="mx-auto flex min-h-[780px] w-full max-w-[430px] flex-col rounded-[2rem] bg-white p-6 shadow-xl shadow-orange-950/10">
         <header className="mb-8 flex items-center">
           <img className="mr-2 size-8 rounded-lg" src={`${baseUrl}icon-192.png`} alt="" />
-          <h1 className="text-3xl font-black tracking-tight text-orange-600">Spēles</h1>
+          <h1 className="text-3xl font-black tracking-tight text-orange-500">Spēles</h1>
         </header>
         <div>
           <h2 className="text-2xl font-bold">Izvēlies spēli</h2>
@@ -22,15 +22,15 @@ function GamesHub() {
         </div>
         <div className="mt-6 space-y-3">
           <Link className="flex w-full items-center gap-4 rounded-2xl bg-orange-50 p-4 ring-2 ring-orange-100 transition hover:bg-orange-100 focus:outline-none focus:ring-orange-400" to="/games/melis">
-            <img className="size-14 rounded-2xl" src={`${baseUrl}icon-192.png`} alt="" />
+            <img className="size-14 rounded-2xl" src={`${baseUrl}melis.png`} alt="" />
             <span className="text-xl font-black">Melis</span>
           </Link>
           <Link className="flex w-full items-center gap-4 rounded-2xl bg-orange-50 p-4 ring-2 ring-orange-100 transition hover:bg-orange-100 focus:outline-none focus:ring-orange-400" to="/games/tik-tok">
-            <div className="flex size-14 items-center justify-center rounded-2xl bg-orange-500 text-2xl font-black text-white" aria-hidden="true">X</div>
+            <img className="size-14 rounded-2xl" src={`${baseUrl}tik-tok.png`} alt="" />
             <span className="text-xl font-black">Tik Tok</span>
           </Link>
           <Link className="flex w-full items-center gap-4 rounded-2xl bg-orange-50 p-4 ring-2 ring-orange-100 transition hover:bg-orange-100 focus:outline-none focus:ring-orange-400" to="/games/memais-sovs">
-            <div className="flex size-14 items-center justify-center rounded-2xl bg-orange-500 text-2xl font-black text-white" aria-hidden="true">M</div>
+            <img className="size-14 rounded-2xl" src={`${baseUrl}memais-sovs.png`} alt="" />
             <span className="text-xl font-black">Mēmais šovs</span>
           </Link>
           {placeholders.map((index) => (
@@ -40,7 +40,7 @@ function GamesHub() {
             </div>
           ))}
         </div>
-        <p className="mt-auto pb-3 pt-6 text-center text-xs text-orange-600">
+        <p className="mt-auto pb-3 pt-6 text-center text-xs text-orange-500">
           <a className="font-semibold" href="https://www.linkedin.com/in/matiss-judins-319235228/" target="_blank" rel="noreferrer">MatissJ</a>
         </p>
       </section>
@@ -88,7 +88,7 @@ function AppRoutes() {
           <h2 className="text-lg font-black">Instalēt Melis</h2>
           <p className="mt-2 text-sm leading-5 text-stone-600">{installPrompt ? 'Pievieno Melis sākuma ekrānam ātrai piekļuvei.' : 'Safari izvēlnē nospied Kopīgot un pēc tam “Pievienot sākuma ekrānam”.'}</p>
           <div className="mt-5 flex gap-3">
-            <button className="flex-1 rounded-xl border-2 border-orange-500 py-3 font-black text-orange-600" onClick={dismissInstall}>Vēlāk</button>
+            <button className="flex-1 rounded-xl border-2 border-orange-500 py-3 font-black text-orange-500" onClick={dismissInstall}>Vēlāk</button>
             <button className="flex-1 rounded-xl bg-orange-500 py-3 font-black text-white" onClick={install}>{installPrompt ? 'Instalēt' : 'Sapratu'}</button>
           </div>
         </div>
