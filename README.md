@@ -1,6 +1,6 @@
 # Melis
 
-Melis is a Latvian mobile party-games PWA. It currently contains Melis, Tik Tok, and Mēmais šovs; more games are expected.
+Melis is a Latvian mobile party-games PWA. It currently contains Melis, Tik Tok, Mēmais šovs, 20 jautājumi, and Lats vai gerbonis; more games are expected.
 
 ## Product constraints
 
@@ -18,6 +18,8 @@ Use URL-based game navigation, not a single `screen` state in `App`. Use `HashRo
 /#/games/melis              Melis
 /#/games/tik-tok            Tik Tok
 /#/games/memais-sovs        Mēmais šovs
+/#/games/20-jautajumi       20 jautājumi
+/#/games/cipars-vai-gerbonis Lats vai gerbonis
 ```
 
 ```text
@@ -27,6 +29,10 @@ src/
     GameShell.tsx           Header, Home action, Rules overlay
     games.ts                Static lazy route imports
   games/
+    20-jautajumi/
+      TwentyQuestionsGame.tsx
+    cipars-vai-gerbonis/
+      CiparsVaiGerbonisGame.tsx
     melis/
       MelisGame.tsx
       melisRules.ts

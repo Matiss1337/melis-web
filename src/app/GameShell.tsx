@@ -4,7 +4,7 @@ import { baseUrl } from '../baseUrl'
 export type Rule = { title: string; body: string }
 
 type GameShellProps = {
-  title: string
+  title: ReactNode
   icon: string
   rules: readonly Rule[]
   children: ReactNode

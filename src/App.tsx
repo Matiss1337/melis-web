@@ -1,12 +1,12 @@
 import { Suspense, useEffect, useState } from 'react'
 import { HashRouter, Link, Route, Routes, useNavigate } from 'react-router-dom'
 import { baseUrl } from './baseUrl'
-import { MelisGame, MemaisSovsGame, TikTokGame } from './app/games'
+import { CiparsVaiGerbonisGame, MelisGame, MemaisSovsGame, TikTokGame, TwentyQuestionsGame } from './app/games'
 
 type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }
 
 const installPromptKey = 'melis-install-prompt-seen'
-const placeholders = Array.from({ length: 3 }, (_, index) => index)
+const placeholders = [0]
 
 function GamesHub() {
   return (
@@ -14,24 +14,28 @@ function GamesHub() {
       <section className="mx-auto flex min-h-[780px] w-full max-w-[430px] flex-col rounded-[2rem] bg-white p-6 shadow-xl shadow-orange-950/10">
         <header className="mb-8 flex items-center">
           <img className="mr-2 size-8 rounded-lg" src={`${baseUrl}icon-192.png`} alt="" />
-          <h1 className="text-3xl font-black tracking-tight text-orange-500">Spēles</h1>
+          <h1 className="text-3xl font-black tracking-tight text-orange-500">Vakara spēles</h1>
         </header>
-        <div>
-          <h2 className="text-2xl font-bold">Izvēlies spēli</h2>
-          <p className="mt-1 text-stone-500">Izvēlies spēli vakaram.</p>
-        </div>
-        <div className="mt-6 space-y-3">
+        <div className="space-y-3">
           <Link className="flex w-full items-center gap-4 rounded-2xl bg-orange-50 p-4 ring-2 ring-orange-100 transition hover:bg-orange-100 focus:outline-none focus:ring-orange-400" to="/games/melis">
             <img className="size-14 rounded-2xl" src={`${baseUrl}melis.png`} alt="" />
             <span className="text-xl font-black">Melis</span>
           </Link>
-          <Link className="flex w-full items-center gap-4 rounded-2xl bg-orange-50 p-4 ring-2 ring-orange-100 transition hover:bg-orange-100 focus:outline-none focus:ring-orange-400" to="/games/tik-tok">
-            <img className="size-14 rounded-2xl" src={`${baseUrl}tik-tok.png`} alt="" />
-            <span className="text-xl font-black">Tik Tok</span>
-          </Link>
           <Link className="flex w-full items-center gap-4 rounded-2xl bg-orange-50 p-4 ring-2 ring-orange-100 transition hover:bg-orange-100 focus:outline-none focus:ring-orange-400" to="/games/memais-sovs">
             <img className="size-14 rounded-2xl" src={`${baseUrl}memais-sovs.png`} alt="" />
             <span className="text-xl font-black">Mēmais šovs</span>
+          </Link>
+          <Link className="flex w-full items-center gap-4 rounded-2xl bg-orange-50 p-4 ring-2 ring-orange-100 transition hover:bg-orange-100 focus:outline-none focus:ring-orange-400" to="/games/20-jautajumi">
+            <img className="size-14 rounded-2xl" src={`${baseUrl}20-questions.png`} alt="" />
+            <span className="text-xl font-black">20 jautājumi</span>
+          </Link>
+          <Link className="flex w-full items-center gap-4 rounded-2xl bg-orange-50 p-4 ring-2 ring-orange-100 transition hover:bg-orange-100 focus:outline-none focus:ring-orange-400" to="/games/cipars-vai-gerbonis">
+            <img className="size-14 rounded-full" src={`${baseUrl}coin-number.png`} alt="" />
+            <span className="text-xl font-black">Lats vai gerbonis</span>
+          </Link>
+          <Link className="flex w-full items-center gap-4 rounded-2xl bg-orange-50 p-4 ring-2 ring-orange-100 transition hover:bg-orange-100 focus:outline-none focus:ring-orange-400" to="/games/tik-tok">
+            <img className="size-14 rounded-2xl" src={`${baseUrl}tik-tok.png`} alt="" />
+            <span className="text-xl font-black">Tik Tok</span>
           </Link>
           {placeholders.map((index) => (
             <div className="flex items-center gap-4 rounded-2xl bg-stone-100 p-4 opacity-60" key={index}>
@@ -99,6 +103,8 @@ function AppRoutes() {
           <Route path="/games/melis" element={<MelisGame onHome={onHome} />} />
           <Route path="/games/tik-tok" element={<TikTokGame onHome={onHome} />} />
           <Route path="/games/memais-sovs" element={<MemaisSovsGame onHome={onHome} />} />
+          <Route path="/games/20-jautajumi" element={<TwentyQuestionsGame onHome={onHome} />} />
+          <Route path="/games/cipars-vai-gerbonis" element={<CiparsVaiGerbonisGame onHome={onHome} />} />
           <Route path="*" element={<GamesHub />} />
         </Routes>
       </Suspense>
