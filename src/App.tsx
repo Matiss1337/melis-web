@@ -2,10 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import lvLocationsSource from '../locations.md?raw'
 import { baseUrl } from './baseUrl'
 
-type Screen = 'home' | 'setup' | 'roles' | 'game' | 'finished'
+type Screen = 'home' | 'setup' | 'roles' | 'game' | 'finished' | 'tickTock'
 type SavedGame = { players: string[]; minutes: number }
 type PlayedLocation = { locationIndex: number; playedAt: number }
 type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }
+type TickTockCell = 'X' | 'O' | null
 
 const storageKey = 'melis-settings'
 const playedLocationsKey = 'melis-played-locations'
@@ -13,13 +14,31 @@ const installPromptKey = 'melis-install-prompt-seen'
 const weekInMilliseconds = 7 * 24 * 60 * 60 * 1000
 const parseLocations = (source: string) => source.match(/^\d+\. (.+)$/gm)?.map((line) => line.replace(/^\d+\. /, '')) ?? []
 const locations = parseLocations(lvLocationsSource)
-const placeholderGames = Array.from({ length: 5 }, (_, index) => index)
+const placeholderGames = Array.from({ length: 4 }, (_, index) => index)
+const tickTockLines = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
+] as const
+const tickTockRows = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+] as const
+const createTickTockBoard = (): TickTockCell[] => Array.from({ length: 9 }, () => null)
 
 const t = {
   gamesTitle: 'Spēles',
   chooseGame: 'Izvēlies spēli',
   gamesSubtitle: 'Izvēlies spēli vakaram.',
   comingSoon: 'Coming soon',
+  tickTock: 'Tick Tock',
+  reset: 'Reset',
   openSettings: 'Atvērt iestatījumus',
   openRules: 'Atvērt noteikumus',
   closeRules: 'Aizvērt noteikumus',
@@ -113,10 +132,19 @@ function App() {
   const [rulesOpen, setRulesOpen] = useState(false)
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null)
   const [installOpen, setInstallOpen] = useState(false)
+  const [tickTockBoard, setTickTockBoard] = useState<TickTockCell[]>(createTickTockBoard)
+  const [tickTockTurn, setTickTockTurn] = useState<Exclude<TickTockCell, null>>('X')
 
   const validPlayers = players.map((player) => player.trim()).filter(Boolean)
   const canStart = players.length >= 3 && players.every((player) => player.trim().length > 0)
   const save = () => localStorage.setItem(storageKey, JSON.stringify({ players: validPlayers, minutes }))
+  const tickTockWinner = useMemo(() => {
+    const winningLine = tickTockLines.find(([first, second, third]) => (
+      tickTockBoard[first] && tickTockBoard[first] === tickTockBoard[second] && tickTockBoard[first] === tickTockBoard[third]
+    ))
+
+    return winningLine ? tickTockBoard[winningLine[0]] : null
+  }, [tickTockBoard])
 
   useEffect(() => {
     if (screen !== 'game' || paused || secondsLeft <= 0) return
@@ -210,7 +238,17 @@ function App() {
     await installPrompt.userChoice
     dismissInstall()
   }
-  const gameTitle = screen === 'home' ? t.gamesTitle : 'Melis'
+  const resetTickTock = () => {
+    setTickTockBoard(createTickTockBoard())
+    setTickTockTurn('X')
+  }
+  const playTickTock = (index: number) => {
+    if (tickTockBoard[index] || tickTockWinner || tickTockBoard.every(Boolean)) return
+
+    setTickTockBoard((board) => board.map((cell, cellIndex) => cellIndex === index ? tickTockTurn : cell))
+    setTickTockTurn((turn) => turn === 'X' ? 'O' : 'X')
+  }
+  const gameTitle = screen === 'home' ? t.gamesTitle : screen === 'tickTock' ? t.tickTock : 'Melis'
 
   return (
     <main className="min-h-dvh bg-orange-50 px-4 py-6 text-stone-900 sm:flex sm:items-center sm:justify-center">
@@ -221,14 +259,14 @@ function App() {
             <h1 className="text-3xl font-black tracking-tight text-orange-600">{gameTitle}</h1>
           </div>
           <div className="flex items-center gap-3">
-            {screen !== 'home' && screen !== 'setup' && (
+            {screen !== 'home' && screen !== 'setup' && screen !== 'tickTock' && (
               <button className="text-orange-600" aria-label={t.openSettings} onClick={openSettings}>
                 <svg className="size-8 fill-current" viewBox="0 0 24 24">
                   <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.96-.7 2.8l1.46 1.46A7.94 7.94 0 0 0 20 12c0-4.42-3.58-8-8-8Zm-6.76 4.74A7.94 7.94 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3c-3.31 0-6-2.69-6-6 0-1.01.25-1.96.7-2.8L5.24 8.74Z" />
                 </svg>
               </button>
             )}
-            {screen !== 'home' && (
+            {screen !== 'home' && screen !== 'tickTock' && (
               <button
                 className="text-orange-600"
                 aria-label={t.openRules}
@@ -303,6 +341,16 @@ function App() {
                 <img className="size-14 rounded-2xl" src={`${baseUrl}icon-192.png`} alt="" />
                 <span className="text-xl font-black">Melis</span>
               </button>
+              <button
+                className="flex w-full items-center gap-4 rounded-2xl bg-orange-50 p-4 text-left ring-2 ring-orange-100 transition hover:bg-orange-100 focus:outline-none focus:ring-orange-400"
+                onClick={() => {
+                  resetTickTock()
+                  setScreen('tickTock')
+                }}
+              >
+                <div className="flex size-14 items-center justify-center rounded-2xl bg-stone-900 text-2xl font-black text-white">X</div>
+                <span className="text-xl font-black">{t.tickTock}</span>
+              </button>
               {placeholderGames.map((index) => (
                 <div className="flex items-center gap-4 rounded-2xl bg-stone-100 p-4 opacity-60" key={index}>
                   <img className="size-14 rounded-2xl grayscale" src={`${baseUrl}icon-192.png`} alt="" />
@@ -313,6 +361,29 @@ function App() {
             <p className="mt-auto pb-3 pt-6 text-center text-xs text-orange-600">
               <a className="font-semibold" href="https://www.linkedin.com/in/matiss-judins-319235228/" target="_blank" rel="noreferrer">MatissJ</a>
             </p>
+          </div>
+        )}
+
+        {screen === 'tickTock' && (
+          <div className="flex min-h-[600px] flex-col items-center justify-center gap-6">
+            <div className="w-full space-y-3">
+              {tickTockRows.map((row) => (
+                <div className="flex gap-3" key={row.join('-')}>
+                  {row.map((index) => (
+                    <button
+                      className="flex aspect-square flex-1 items-center justify-center rounded-2xl bg-orange-50 text-5xl font-black text-stone-900 ring-2 ring-orange-100 disabled:cursor-default"
+                      aria-label={`Tick Tock ${index + 1}`}
+                      disabled={Boolean(tickTockBoard[index]) || Boolean(tickTockWinner) || tickTockBoard.every(Boolean)}
+                      key={index}
+                      onClick={() => playTickTock(index)}
+                    >
+                      {tickTockBoard[index]}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <button className="w-full rounded-2xl bg-orange-500 py-4 text-lg font-black text-white" onClick={resetTickTock}>{t.reset}</button>
           </div>
         )}
 
