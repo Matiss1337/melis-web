@@ -34,17 +34,36 @@ const tickTockRows = [
 const createTickTockBoard = (): TickTockCell[] => Array.from({ length: 9 }, () => null)
 const randomSilentShowWord = () => silentShowWords[Math.floor(Math.random() * silentShowWords.length)] ?? silentShowWords[0]
 
+function TickTockIcon({ mark, className, showLabel = true }: { mark: Exclude<TickTockCell, null>; className: string; showLabel?: boolean }) {
+  return (
+    <>
+      {showLabel && <span className="sr-only">{mark}</span>}
+      {mark === 'X' ? (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true">
+          <path d="m6 6 12 12M18 6 6 18" />
+        </svg>
+      ) : (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden="true">
+          <circle cx="12" cy="12" r="7" />
+        </svg>
+      )}
+    </>
+  )
+}
+
 const t = {
   gamesTitle: 'Spēles',
   chooseGame: 'Izvēlies spēli',
   gamesSubtitle: 'Izvēlies spēli vakaram.',
-  comingSoon: 'Coming soon',
-  tickTock: 'Tick Tock',
+  comingSoon: 'Iznāks vēlāk',
+  tickTock: 'Tik Tok',
   silentShow: 'Mēmais šovs',
-  oneWordDifficulty: '1 vārds',
+  revealWord: 'Atvērt vārdu',
+  hideWord: 'Paslēpt vārdu',
   nextWord: 'Nākamais vārds',
-  reset: 'Reset',
+  reset: 'Sākt no jauna',
   openSettings: 'Atvērt iestatījumus',
+  goHome: 'Uz spēlēm',
   openRules: 'Atvērt noteikumus',
   closeRules: 'Aizvērt noteikumus',
   rulesTitle: 'Spēles noteikumi',
@@ -76,8 +95,8 @@ const t = {
       body: 'Uzvar tas, kurš savieno trīs savus simbolus rindā, kolonnā vai diagonālē.',
     },
     {
-      title: 'Reset',
-      body: 'Nospied Reset, lai sāktu no sākuma.',
+      title: 'Sākt no jauna',
+      body: 'Nospied “Sākt no jauna”, lai sāktu no sākuma.',
     },
   ],
   silentShowRules: [
@@ -88,10 +107,6 @@ const t = {
     {
       title: 'Minēšana',
       body: 'Pārējie min skaļi. Kad vārds uzminēts, spied “Nākamais vārds”.',
-    },
-    {
-      title: 'Grūtība',
-      body: 'Pagaidām katrs uzdevums ir viens vārds.',
     },
   ],
   installTitle: 'Instalēt Melis',
@@ -168,17 +183,17 @@ function App() {
   const [tickTockBoard, setTickTockBoard] = useState<TickTockCell[]>(createTickTockBoard)
   const [tickTockTurn, setTickTockTurn] = useState<Exclude<TickTockCell, null>>('X')
   const [silentShowWord, setSilentShowWord] = useState<string>(silentShowWords[0])
+  const [silentShowRevealed, setSilentShowRevealed] = useState(false)
 
   const validPlayers = players.map((player) => player.trim()).filter(Boolean)
   const canStart = players.length >= 3 && players.every((player) => player.trim().length > 0)
   const save = () => localStorage.setItem(storageKey, JSON.stringify({ players: validPlayers, minutes }))
-  const tickTockWinner = useMemo(() => {
-    const winningLine = tickTockLines.find(([first, second, third]) => (
+  const tickTockWinningLine = useMemo(() => (
+    tickTockLines.find(([first, second, third]) => (
       tickTockBoard[first] && tickTockBoard[first] === tickTockBoard[second] && tickTockBoard[first] === tickTockBoard[third]
     ))
-
-    return winningLine ? tickTockBoard[winningLine[0]] : null
-  }, [tickTockBoard])
+  ), [tickTockBoard])
+  const tickTockWinner = tickTockWinningLine ? tickTockBoard[tickTockWinningLine[0]] : null
 
   useEffect(() => {
     if (screen !== 'game' || paused || secondsLeft <= 0) return
@@ -282,7 +297,10 @@ function App() {
     setTickTockBoard((board) => board.map((cell, cellIndex) => cellIndex === index ? tickTockTurn : cell))
     setTickTockTurn((turn) => turn === 'X' ? 'O' : 'X')
   }
-  const nextSilentShowWord = () => setSilentShowWord(randomSilentShowWord())
+  const nextSilentShowWord = () => {
+    setSilentShowWord(randomSilentShowWord())
+    setSilentShowRevealed(false)
+  }
   const rules = screen === 'tickTock' ? t.tickTockRules : screen === 'silentShow' ? t.silentShowRules : t.rules
   const gameTitle = screen === 'home' ? t.gamesTitle : screen === 'tickTock' ? t.tickTock : screen === 'silentShow' ? t.silentShow : 'Melis'
 
@@ -299,6 +317,21 @@ function App() {
               <button className="text-orange-600" aria-label={t.openSettings} onClick={openSettings}>
                 <svg className="size-8 fill-current" viewBox="0 0 24 24">
                   <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.96-.7 2.8l1.46 1.46A7.94 7.94 0 0 0 20 12c0-4.42-3.58-8-8-8Zm-6.76 4.74A7.94 7.94 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3c-3.31 0-6-2.69-6-6 0-1.01.25-1.96.7-2.8L5.24 8.74Z" />
+                </svg>
+              </button>
+            )}
+            {screen !== 'home' && (
+              <button
+                className="text-orange-600"
+                aria-label={t.goHome}
+                onClick={() => {
+                  setPaused(false)
+                  setRulesOpen(false)
+                  setScreen('home')
+                }}
+              >
+                <svg className="size-8 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m12 3 9 8h-3v9h-5v-6h-2v6H6v-9H3l9-8Z" />
                 </svg>
               </button>
             )}
@@ -384,7 +417,7 @@ function App() {
                   setScreen('tickTock')
                 }}
               >
-                <div className="flex size-14 items-center justify-center rounded-2xl bg-stone-900 text-2xl font-black text-white" aria-hidden="true">X</div>
+                <div className="flex size-14 items-center justify-center rounded-2xl bg-orange-500 text-2xl font-black text-white" aria-hidden="true">X</div>
                 <span className="text-xl font-black">{t.tickTock}</span>
               </button>
               <button
@@ -394,7 +427,7 @@ function App() {
                   setScreen('silentShow')
                 }}
               >
-                <div className="flex size-14 items-center justify-center rounded-2xl bg-stone-900 text-2xl font-black text-white" aria-hidden="true">M</div>
+                <div className="flex size-14 items-center justify-center rounded-2xl bg-orange-500 text-2xl font-black text-white" aria-hidden="true">M</div>
                 <span className="text-xl font-black">{t.silentShow}</span>
               </button>
               {placeholderGames.map((index) => (
@@ -413,32 +446,61 @@ function App() {
         {screen === 'silentShow' && (
           <div className="flex min-h-[600px] flex-col items-center justify-center gap-6 text-center">
             <div className="w-full rounded-2xl bg-orange-50 p-6 ring-2 ring-orange-100">
-              <p className="text-sm font-bold uppercase tracking-wider text-orange-500">{t.oneWordDifficulty}</p>
-              <p className="mt-3 text-5xl font-black text-stone-900">{silentShowWord}</p>
+              <p className="text-5xl font-black text-stone-900">{silentShowRevealed ? silentShowWord : '???'}</p>
             </div>
+            <button className="w-full rounded-2xl bg-stone-900 py-4 text-lg font-black text-white" onClick={() => setSilentShowRevealed((revealed) => !revealed)}>
+              {silentShowRevealed ? t.hideWord : t.revealWord}
+            </button>
             <button className="w-full rounded-2xl bg-orange-500 py-4 text-lg font-black text-white" onClick={nextSilentShowWord}>{t.nextWord}</button>
           </div>
         )}
 
         {screen === 'tickTock' && (
           <div className="flex min-h-[600px] flex-col items-center justify-center gap-6">
-            <div className="w-full space-y-3">
+            <div className="relative w-full space-y-3">
               {tickTockRows.map((row) => (
                 <div className="flex gap-3" key={row.join('-')}>
                   {row.map((index) => (
                     <button
-                      className="flex aspect-square flex-1 items-center justify-center rounded-2xl bg-orange-50 text-5xl font-black text-stone-900 ring-2 ring-orange-100 disabled:cursor-default"
-                      aria-label={`Tick Tock ${index + 1}`}
+                      className="flex aspect-square flex-1 items-center justify-center rounded-2xl bg-orange-50 text-orange-500 ring-2 ring-orange-100 disabled:cursor-default"
+                      aria-label={`Tik Tok ${index + 1}`}
                       disabled={Boolean(tickTockBoard[index]) || Boolean(tickTockWinner) || tickTockBoard.every(Boolean)}
                       key={index}
                       onClick={() => playTickTock(index)}
                     >
-                      {tickTockBoard[index]}
+                      {tickTockBoard[index] && <TickTockIcon mark={tickTockBoard[index]} className="size-16" />}
                     </button>
                   ))}
                 </div>
               ))}
+              {tickTockWinningLine && (
+                <svg className="pointer-events-none absolute inset-0 size-full text-orange-500" viewBox="0 0 3 3" preserveAspectRatio="none" aria-hidden="true">
+                  <line
+                    x1={tickTockWinningLine[0] % 3 + 0.5 - Math.sign(tickTockWinningLine[2] % 3 - tickTockWinningLine[0] % 3) * 0.3}
+                    y1={Math.floor(tickTockWinningLine[0] / 3) + 0.5 - Math.sign(Math.floor(tickTockWinningLine[2] / 3) - Math.floor(tickTockWinningLine[0] / 3)) * 0.3}
+                    x2={tickTockWinningLine[2] % 3 + 0.5 + Math.sign(tickTockWinningLine[2] % 3 - tickTockWinningLine[0] % 3) * 0.3}
+                    y2={Math.floor(tickTockWinningLine[2] / 3) + 0.5 + Math.sign(Math.floor(tickTockWinningLine[2] / 3) - Math.floor(tickTockWinningLine[0] / 3)) * 0.3}
+                    stroke="currentColor"
+                    strokeWidth="0.04"
+                    strokeLinecap="round"
+                    data-testid="tik-tok-winning-line"
+                  />
+                </svg>
+              )}
             </div>
+            <h2 className="flex items-center gap-3 rounded-full bg-orange-50 px-5 py-3 font-black text-stone-700 ring-2 ring-orange-100">
+              {tickTockWinner ? (
+                <>
+                  <TickTockIcon mark={tickTockWinner} className="size-7 text-orange-500" showLabel={false} />
+                  <span>Uzvarēja!</span>
+                </>
+              ) : (
+                <>
+                  <span>Nākamais:</span>
+                  <TickTockIcon mark={tickTockTurn} className="size-7 text-orange-500" />
+                </>
+              )}
+            </h2>
             <button className="w-full rounded-2xl bg-orange-500 py-4 text-lg font-black text-white" onClick={resetTickTock}>{t.reset}</button>
           </div>
         )}
