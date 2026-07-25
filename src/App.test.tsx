@@ -26,7 +26,8 @@ describe('App', () => {
 
     expect(screen.getByRole('heading', { name: 'Spēles' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Melis' })).toBeInTheDocument()
-    expect(screen.getAllByText('Coming soon')).toHaveLength(5)
+    expect(screen.getByRole('button', { name: 'Tick Tock' })).toBeInTheDocument()
+    expect(screen.getAllByText('Coming soon')).toHaveLength(4)
 
     await openMelis(user)
 
@@ -80,5 +81,30 @@ describe('App', () => {
 
     expect(screen.getByRole('heading', { name: 'Anna' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Skatīt lokāciju' })).toBeInTheDocument()
+  })
+
+  it('starts tick tock and resets the board', async () => {
+    const user = userEvent.setup()
+
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: 'Tick Tock' }))
+    await user.click(screen.getByRole('button', { name: 'Atvērt noteikumus' }))
+
+    expect(screen.getByRole('heading', { name: 'Spēles noteikumi' })).toBeInTheDocument()
+    expect(screen.getByText('Gājieni')).toBeInTheDocument()
+    expect(screen.getByText('Spēlētāji pēc kārtas spiež tukšu lauciņu. Pirmais gājiens ir X.')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Aizvērt noteikumus' }))
+    await user.click(screen.getByRole('button', { name: 'Tick Tock 1' }))
+    await user.click(screen.getByRole('button', { name: 'Tick Tock 2' }))
+
+    expect(screen.getByRole('button', { name: 'Tick Tock 1' })).toHaveTextContent('X')
+    expect(screen.getByRole('button', { name: 'Tick Tock 2' })).toHaveTextContent('O')
+
+    await user.click(screen.getByRole('button', { name: 'Reset' }))
+
+    expect(screen.getByRole('button', { name: 'Tick Tock 1' })).toHaveTextContent('')
+    expect(screen.getByRole('button', { name: 'Tick Tock 2' })).toHaveTextContent('')
   })
 })
