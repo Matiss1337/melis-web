@@ -350,7 +350,7 @@ function App() {
     await installPrompt.userChoice
     dismissInstall()
   }
-  const gameTitle = screen === 'home' ? t.gamesTitle : 'Malice'
+  const gameTitle = screen === 'home' ? t.gamesTitle : 'Melis'
 
   return (
     <main className="min-h-dvh bg-orange-50 px-4 py-6 text-stone-900 sm:flex sm:items-center sm:justify-center">
@@ -453,7 +453,7 @@ function App() {
                 onClick={() => setScreen('setup')}
               >
                 <img className="size-14 rounded-2xl" src={`${baseUrl}icon-192.png`} alt="" />
-                <span className="text-xl font-black">Malice</span>
+                <span className="text-xl font-black">Melis</span>
               </button>
               {placeholderGames.map((index) => (
                 <div className="flex items-center gap-4 rounded-2xl bg-stone-100 p-4 opacity-60" key={index}>
