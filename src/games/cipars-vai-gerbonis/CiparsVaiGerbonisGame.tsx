@@ -27,7 +27,7 @@ export default function CiparsVaiGerbonisGame({ onHome }: { onHome: () => void }
   }, [])
 
   return (
-    <GameShell title={<span className="whitespace-nowrap text-2xl">Lats vai gerbonis</span>} icon="coin-number.png" rules={rules} onHome={onHome}>
+    <GameShell title="Lats vai gerbonis" icon="coin-number.png" rules={rules} onHome={onHome}>
       <div className="flex min-h-[600px] flex-col items-center justify-center text-center">
         <div className="size-52 overflow-hidden rounded-full [perspective:800px]">
           {tossing ? (
