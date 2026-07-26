@@ -11,7 +11,7 @@ test('opens every game from the hub and returns home', async ({ page }) => {
     await page.getByRole('link', { name }).click()
     await expect(page.getByRole('heading', { name })).toBeVisible()
     await page.getByRole('button', { name: 'Uz spēlēm' }).click()
-    await expect(page.getByRole('heading', { name: 'Vakara spēles' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Vakara Spēles' })).toBeVisible()
   }
 })
 

@@ -11,14 +11,15 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Melis',
-        short_name: 'Melis',
+        name: 'Vakara Spēles',
+        short_name: 'Vakara Spēles',
+        description: 'Latviešu vakara spēļu kolekcija telefonam.',
         lang: 'lv',
         display: 'fullscreen',
         theme_color: '#f97316',
         background_color: '#fff7ed',
         icons: [
-          { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'vakara-speles-icon-192.png', sizes: '192x192', type: 'image/png' },
         ],
       },
     }),
