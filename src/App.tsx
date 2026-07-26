@@ -14,7 +14,7 @@ function GamesHub() {
       <section className="mx-auto flex min-h-[780px] w-full max-w-[430px] flex-col rounded-[2rem] bg-white p-6 shadow-xl shadow-orange-950/10">
         <header className="mb-8 flex items-center">
           <img className="mr-2 size-8 rounded-lg" src={`${baseUrl}icon-192.png`} alt="" />
-          <h1 className="text-3xl font-black tracking-tight text-orange-500">Vakara spēles</h1>
+          <h1 className="text-3xl font-black tracking-tight text-orange-500">Vakara Spēles</h1>
         </header>
         <div className="space-y-3">
           <Link className="flex w-full items-center gap-4 rounded-2xl bg-orange-50 p-4 ring-2 ring-orange-100 transition hover:bg-orange-100 focus:outline-none focus:ring-orange-400" to="/games/melis">
@@ -89,8 +89,8 @@ function AppRoutes() {
     <>
       {installOpen && (
         <div className="fixed inset-x-6 top-20 z-20 mx-auto max-w-[382px] rounded-2xl bg-white p-5 shadow-2xl ring-1 ring-stone-200">
-          <h2 className="text-lg font-black">Instalēt Melis</h2>
-          <p className="mt-2 text-sm leading-5 text-stone-600">{installPrompt ? 'Pievieno Melis sākuma ekrānam ātrai piekļuvei.' : 'Safari izvēlnē nospied Kopīgot un pēc tam “Pievienot sākuma ekrānam”.'}</p>
+          <h2 className="text-lg font-black">Instalēt Vakara Spēles</h2>
+          <p className="mt-2 text-sm leading-5 text-stone-600">{installPrompt ? 'Pievieno Vakara Spēles sākuma ekrānam ātrai piekļuvei.' : 'Safari izvēlnē nospied Kopīgot un pēc tam “Pievienot sākuma ekrānam”.'}</p>
           <div className="mt-5 flex gap-3">
             <button className="flex-1 rounded-xl border-2 border-orange-500 py-3 font-black text-orange-500" onClick={dismissInstall}>Vēlāk</button>
             <button className="flex-1 rounded-xl bg-orange-500 py-3 font-black text-white" onClick={install}>{installPrompt ? 'Instalēt' : 'Sapratu'}</button>
