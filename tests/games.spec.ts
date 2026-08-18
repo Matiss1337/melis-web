@@ -6,6 +6,27 @@ test.beforeEach(async ({ page }) => {
   await page.reload()
 })
 
+test('switches only the home page to English', async ({ page }) => {
+  const englishFlag = page.getByRole('button', { name: 'Pārslēgt uz angļu valodu' })
+  await expect(englishFlag).toHaveText('🇬🇧')
+  await englishFlag.click()
+
+  await expect(page.getByRole('heading', { name: 'Evening Games' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Spy' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Charades' })).toBeVisible()
+  await expect(page.getByRole('link', { name: '20 Questions' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Heads or Tails' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Tic-Tac-Toe' })).toBeVisible()
+  await expect(page.getByText('Coming soon')).toBeVisible()
+
+  const latvianFlag = page.getByRole('button', { name: 'Switch to Latvian' })
+  await expect(latvianFlag).toHaveText('🇱🇻')
+  await page.getByRole('link', { name: 'Spy' }).click()
+  await expect(page.getByRole('heading', { name: 'Melis' })).toBeVisible()
+  await page.getByRole('button', { name: 'Uz spēlēm' }).click()
+  await expect(page.getByRole('heading', { name: 'Evening Games' })).toBeVisible()
+})
+
 test('opens every game from the hub and returns home', async ({ page }) => {
   for (const name of ['Melis', 'Tik Tok', 'Mēmais šovs', '20 jautājumi', 'Lats vai gerbonis']) {
     await page.getByRole('link', { name }).click()
